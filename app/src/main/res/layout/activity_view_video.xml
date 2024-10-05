@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout_video"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_grey"
+    android:keepScreenOn="true"
+    tools:context=".test.Activity.ViewVideoActivity">
+
+    <!-- ImageView for Play Button, centered at the top -->
+    <!--
+        <ImageView
+            android:id="@+id/img_play_videoBtn"
+            android:layout_width="70sp"
+            android:layout_height="70sp"
+            android:src="@drawable/img_play"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+
+            android:visibility="visible" />
+    -->
+
+    <!-- Top Relative Layout -->
+
+    <LinearLayout
+        android:id="@+id/layout_top_video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingVertical="7dp">
+
+        <ImageView
+            android:id="@+id/img_backBtn"
+            android:layout_width="36dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="18dp"
+            android:src="@drawable/img_back_arrow" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txt_img_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="February 5,2024"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/txt_img_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:08"
+                android:textColor="@color/grey"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/img_lock"
+            android:layout_width="36dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/img_lock" />
+    </LinearLayout>
+
+    <!-- ViewPager for Swiping Images -->
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vpFullVideo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/layout_top_video"
+        android:layout_above="@id/layout_bottom_video"
+        android:layout_centerInParent="true" />
+
+
+    <!-- Bottom LinearLayout -->
+    <LinearLayout
+        android:id="@+id/layout_bottom_video"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp">
+
+        <ImageView
+            android:id="@+id/img_share"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_share" />
+
+        <ImageView
+            android:id="@+id/img_edit"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_edit" />
+
+        <ImageView
+            android:id="@+id/img_favorite"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_heart" />
+
+        <ImageView
+            android:id="@+id/img_delete"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_trash" />
+
+        <ImageView
+            android:id="@+id/img_more"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_dots" />
+    </LinearLayout>
+
+</RelativeLayout>
