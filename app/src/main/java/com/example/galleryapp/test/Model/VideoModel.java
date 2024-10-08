@@ -9,7 +9,7 @@ public class VideoModel {
     String resolution;
     String duration;
     String displayName;
-    String wh;
+    String widthHeight;
 
     public VideoModel(String id, String path, String title, String size, String resolution, String duration, String displayName, String wh) {
         this.id = id;
@@ -19,7 +19,7 @@ public class VideoModel {
         this.resolution = resolution;
         this.duration = duration;
         this.displayName = displayName;
-        this.wh = wh;
+        this.widthHeight = wh;
     }
 
     public String getId() {
@@ -78,11 +78,32 @@ public class VideoModel {
         this.displayName = displayName;
     }
 
-    public String getWh() {
-        return wh;
+    public String getWidthHeight() {
+        return widthHeight;
     }
 
-    public void setWh(String wh) {
-        this.wh = wh;
+    public void setWidthHeight(String widthHeight) {
+        this.widthHeight = widthHeight;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        VideoModel videoModel = (VideoModel) obj;
+
+        // Null-safe comparisons for all fields
+        if (path != null ? !path.equals(videoModel.path) : videoModel.path != null) return false;
+        if (title != null ? !title.equals(videoModel.title) : videoModel.title != null) return false;
+        if (size != null ? !size.equals(videoModel.size) : videoModel.size != null) return false;
+        if (resolution != null ? !resolution.equals(videoModel.resolution) : videoModel.resolution != null) return false;
+        if (duration != null ? !duration.equals(videoModel.duration) : videoModel.duration != null) return false;
+        if (displayName != null ? !displayName.equals(videoModel.displayName) : videoModel.displayName != null) return false;
+        if (widthHeight != null ? !widthHeight.equals(videoModel.widthHeight) : videoModel.widthHeight != null) return false;
+
+        return true;
+    }
+
+
 }
