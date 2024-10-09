@@ -10,20 +10,16 @@
     tools:context=".test.Activity.ViewVideoActivity">
 
     <!-- ImageView for Play Button, centered at the top -->
-    <!--
-        <ImageView
+    <!--<ImageView
             android:id="@+id/img_play_videoBtn"
             android:layout_width="70sp"
             android:layout_height="70sp"
             android:src="@drawable/img_play"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-
-            android:visibility="visible" />
-    -->
+            android:visibility="visible" />-->
 
     <!-- Top Relative Layout -->
-
     <LinearLayout
         android:id="@+id/layout_top_video"
         android:layout_width="match_parent"
@@ -82,8 +78,8 @@
         android:id="@+id/vpFullVideo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/layout_top_video"
         android:layout_above="@id/layout_bottom_video"
+        android:layout_below="@id/layout_top_video"
         android:layout_centerInParent="true" />
 
 

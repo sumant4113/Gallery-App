@@ -1,9 +1,14 @@
 package com.example.galleryapp.test.Activity;
 
+import android.app.Dialog;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -11,22 +16,22 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
 
-import com.bumptech.glide.Glide;
 import com.example.galleryapp.R;
 import com.example.galleryapp.test.Adapter.VPPhotoAdapter;
-import com.example.galleryapp.test.Adapter.VPVideoAdapter;
-import com.jsibbold.zoomage.ZoomageView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class ViewPictureActivity extends AppCompatActivity {
 
+    private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+    private LinearLayout llBottomSheet;
     //    public static RelativeLayout ;
     public static LinearLayout layoutBottom, layoutTop;
     private ViewPager vpFullPhoto;
@@ -123,6 +128,11 @@ public class ViewPictureActivity extends AppCompatActivity {
         layoutBottom = findViewById(R.id.layout_bottom);
         mainLayout = findViewById(R.id.main_layout);
 
+        // Initialize BottomSheet
+        llBottomSheet = findViewById(R.id.ll_bottomSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
+
+
 
         if (getIntent().getExtras() != null) {
             // Get Data from Intent
@@ -157,11 +167,67 @@ public class ViewPictureActivity extends AppCompatActivity {
             }
         });
 
+        setBottomSheetBehavior();
+
+        imgMore.setOnClickListener(v -> {
+            if (bottomSheetBehavior.getState() != bottomSheetBehavior.STATE_COLLAPSED) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            } else {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
+        });
 
         imgShare.setOnClickListener(view -> {
         });
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         txtImgDate.setText("set Karo");
+
+    }
+
+    private void setBottomSheetBehavior() {
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+
+                } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            }
+        });
+
+        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+    }
+
+
+    private void showBottomDialog() {
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.bottom_sheet_pop_up_layout);
+
+        TextView txtImgName, txtDateTime, txtImgMP, txtImgResolution, txtOnDeviceSize, txtFilePath;
+
+        txtImgName = dialog.findViewById(R.id.txt_imgName);
+        txtDateTime = dialog.findViewById(R.id.txt_dateTime);
+        txtImgMP = dialog.findViewById(R.id.txt_imgMP);
+        txtImgResolution = dialog.findViewById(R.id.txt_imgResolution);
+        txtOnDeviceSize = dialog.findViewById(R.id.txt_onDeviceSize);
+        txtFilePath = dialog.findViewById(R.id.txt_filePath);
+
+
+        dialog.show();
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().getAttributes().windowAnimations = R.style.BottomSheetDialogAnimation;
+        dialog.getWindow().setGravity(Gravity.BOTTOM);
 
     }
 

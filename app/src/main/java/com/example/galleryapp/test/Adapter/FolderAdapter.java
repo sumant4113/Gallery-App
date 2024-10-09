@@ -70,7 +70,9 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.MyClassHol
         String latestFilePath = getLatestFilePath(folderPath);
 
         if (latestFilePath != null) {
-            Glide.with(context).load(latestFilePath).diskCacheStrategy(DiskCacheStrategy.AUTOMATIC).into(holder.imgFolderThumbnail);
+            Glide.with(context).load(latestFilePath).
+                    diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .into(holder.imgFolderThumbnail);
         } else {
             holder.imgFolderThumbnail.setImageResource(R.drawable.brand_google_photos_white);
         }
@@ -128,7 +130,6 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.MyClassHol
 //        }
 //        return latestFile;
 //    }
-
 
     private int countVideos(String folder) {
         int count = 0;

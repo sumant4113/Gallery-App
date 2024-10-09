@@ -44,7 +44,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
         Glide.with(context)
                 .load(videoPath) // Load video thumbnail
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .error(R.drawable.img_error)// Error image
                 .fitCenter()
                 .thumbnail(0.1f)
