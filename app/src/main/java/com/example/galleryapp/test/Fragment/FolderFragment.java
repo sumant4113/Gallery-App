@@ -25,7 +25,6 @@ import com.example.galleryapp.test.Model.VideoModel;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class FolderFragment extends Fragment {
 
     private static final String TAG = "FolderFragment";
@@ -33,7 +32,6 @@ public class FolderFragment extends Fragment {
     private ArrayList<String> folderList = new ArrayList<>();
     private FolderAdapter folderAdapter;
     private RecyclerView rvFolder;
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,7 +60,6 @@ public class FolderFragment extends Fragment {
                 folderAdapter.updateVideoList(videoModelList);
             }
 
-
         } else {
             Toast.makeText(getContext(), "can't find Videos", Toast.LENGTH_SHORT).show();
         }
@@ -70,8 +67,8 @@ public class FolderFragment extends Fragment {
     }
 
     private ArrayList<VideoModel> fetchAllVideos(Context context) {
-        ArrayList<VideoModel> videoModels = new ArrayList<>();
         ArrayList<String> latestFileInFolder = new ArrayList<>();
+        ArrayList<VideoModel> videoModels = new ArrayList<>();
 
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String orderBy = MediaStore.Video.Media.DATE_ADDED + " DESC";

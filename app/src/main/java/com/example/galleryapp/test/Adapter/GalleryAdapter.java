@@ -44,10 +44,11 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         return new ViewHolder(view);
     }
 
+    // This Gallery Adapter works for images only and work for MainFragment
+
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         File image_file = new File(image_list.get(position));
-
 
         if (image_file.exists()) {// File is exists
             if (isHeifOrHeic(image_file.getName())) { // check heif or heic
@@ -61,7 +62,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
                 } catch (IOException e) {
                     holder.imgGalleryItem.setImageResource(R.drawable.img_error);
                     Toast.makeText(context, "Glide fail Heif" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "onBindViewHolder: HeifOrHeic"+e.getMessage());
+                    Log.d(TAG, "onBindViewHolder: HeifOrHeic" + e.getMessage());
                     throw new RuntimeException(e);
                 }
             } else {
@@ -76,7 +77,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
             }
         } else {
             holder.imgGalleryItem.setImageResource(R.drawable.img_error);
-
         }
 
         holder.imgGalleryItem.setOnClickListener(new View.OnClickListener() {
@@ -105,6 +105,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         }
     }
 
+    // Convert heif to bitmap
     public Bitmap convertHeifToBitMap(String heifFilePath) throws IOException {
         File file = new File(heifFilePath);
         InputStream is = new FileInputStream(file);
@@ -113,6 +114,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
         return bitmap;
     }
 
+    // Check heif or heic
     private boolean isHeifOrHeic(String fileName) {
         String fileNameLower = fileName.toLowerCase();
         return fileNameLower.endsWith("heif") || fileNameLower.endsWith("heic");

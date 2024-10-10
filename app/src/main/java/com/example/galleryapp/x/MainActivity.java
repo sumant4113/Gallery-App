@@ -1,4 +1,4 @@
-package com.example.galleryapp;
+package com.example.galleryapp.x;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -19,6 +19,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
+import com.example.galleryapp.R;
 
 import java.util.ArrayList;
 

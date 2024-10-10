@@ -1,4 +1,4 @@
-package com.example.galleryapp;
+package com.example.galleryapp.x;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.galleryapp.R;
 
 import java.util.List;
 

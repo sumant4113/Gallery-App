@@ -1,5 +1,6 @@
 package com.example.galleryapp.test.Activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -12,31 +13,33 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.test.Adapter.ViewPagerGalleryAdapter;
-import com.example.galleryapp.test.MainFragment;
+import com.example.galleryapp.test.Fragment.MainFragment;
 import com.example.galleryapp.test.PermissionManager;
 import com.google.android.material.tabs.TabLayout;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private static final String TAG = "HomeActivity";
     private TabLayout tabLayout;
-    private MainFragment mainFragment;
     private ViewPager viewPager;
+
+    private static final String TAG = "HomeActivity";
+    private MainFragment mainFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        requestPermissions();
         initView();
     }
 
     private void initView() {
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
-        mainFragment = new MainFragment();
-        requestPermissions();
 
+        mainFragment = new MainFragment();
+        // App start and show this MainFragment and images
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.add(R.id.viewPager, mainFragment);
@@ -52,8 +55,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("NewApi")
     private void requestPermissions() {
-        PermissionManager.requestPermissions(this, new PermissionManager.PermissionCallback() {
+        PermissionManager.requestPermissions(HomeActivity.this, new PermissionManager.PermissionCallback() {
             @Override
             public void onPermissionGranted() {
                 Log.d(TAG, "Permission granted");

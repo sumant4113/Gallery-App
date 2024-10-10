@@ -1,4 +1,4 @@
-package com.example.galleryapp;
+package com.example.galleryapp.x;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -73,7 +73,7 @@ public class ImageLoader {
                 String data = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
                 String name = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
 
-                com.example.galleryapp.Image image = new com.example.galleryapp.Image(id, data, name);
+                Image image = new Image(id, data, name);
                 mImageList.add(image);
             }
             cursor.close();

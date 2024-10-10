@@ -6,8 +6,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.example.galleryapp.test.Fragment.FolderFragment;
-import com.example.galleryapp.test.MainFragment;
-import com.example.galleryapp.test.VideoFragment;
+import com.example.galleryapp.test.Fragment.MainFragment;
+import com.example.galleryapp.test.Fragment.VideoFragment;
 
 public class ViewPagerGalleryAdapter extends FragmentPagerAdapter {
 

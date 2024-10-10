@@ -1,4 +1,4 @@
-package com.example.galleryapp;
+package com.example.galleryapp.x;
 
 public class Image {
     int id;

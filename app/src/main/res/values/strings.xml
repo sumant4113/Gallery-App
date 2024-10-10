@@ -2,4 +2,9 @@
     <string name="app_name">Gallery App</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="size_bytes">%1$.2f B</string>
+    <string name="size_kb">%1$.2f KB</string>
+    <string name="size_mb">%1$.2f MP</string>
+    <string name="size_gb">%1$.2f GB</string>
+
 </resources>

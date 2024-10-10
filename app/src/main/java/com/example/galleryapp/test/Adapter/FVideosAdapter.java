@@ -19,22 +19,24 @@ import java.util.ArrayList;
 
 public class FVideosAdapter extends RecyclerView.Adapter<FVideosAdapter.MyViewHolder> {
 
-    private ArrayList<VideoModel> videoFolderList;
     private Context context;
+    private ArrayList<VideoModel> videoFolderList;
 
-    public FVideosAdapter(ArrayList<VideoModel> videoFolderList, Context context) {
-        this.videoFolderList = videoFolderList;
+    public FVideosAdapter(Context context, ArrayList<VideoModel> videoFolderList) {
         this.context = context;
+        this.videoFolderList = videoFolderList;
     }
+
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.file_view, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_file_view, parent, false);
         return new MyViewHolder(view);
     }
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         VideoModel  videoModel  = videoFolderList.get(position);
+
         Glide.with(context)
                 .load(videoModel.getPath())
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
@@ -42,10 +44,12 @@ public class FVideosAdapter extends RecyclerView.Adapter<FVideosAdapter.MyViewHo
 
         holder.txtVideoTime.setText(videoModel.getDuration());
     }
+
     @Override
     public int getItemCount() {
         return videoFolderList.size();
     }
+
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView imgVideoThumbnail;
         TextView txtVideoTime;

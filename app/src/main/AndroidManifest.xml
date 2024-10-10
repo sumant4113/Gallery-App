@@ -26,7 +26,7 @@
         android:theme="@style/Theme.GalleryApp"
         tools:targetApi="31">
         <activity
-            android:name=".test.Activity.FolderActivity"
+            android:name=".test.Activity.ViewFolderActivity"
             android:exported="false" />
         <activity
             android:name=".test.Activity.ViewVideoActivity"
@@ -38,7 +38,7 @@
             android:name=".test.Activity.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".test.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,7 +47,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".x.MainActivity"
             android:exported="false" />
 
         <meta-data

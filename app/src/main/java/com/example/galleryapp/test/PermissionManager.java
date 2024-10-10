@@ -3,10 +3,10 @@ package com.example.galleryapp.test;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 public class PermissionManager {
 
@@ -14,6 +14,7 @@ public class PermissionManager {
 
     public interface PermissionCallback {
         void onPermissionGranted();
+
         void onPermissionDenied();
     }
 
@@ -28,8 +29,7 @@ public class PermissionManager {
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                         android.Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                         android.Manifest.permission.READ_MEDIA_IMAGES,
-                        android.Manifest.permission.READ_MEDIA_VIDEO
-                };
+                        android.Manifest.permission.READ_MEDIA_VIDEO};
             } else {
                 permissions = new String[]{
                         android.Manifest.permission.READ_EXTERNAL_STORAGE,

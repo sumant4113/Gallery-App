@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     app:cardCornerRadius="8dp"
     app:cardUseCompatPadding="true">
-
+    <!-- This image view Parent CardVide So Images Show in Cards-->
     <ImageView
         android:id="@+id/img_gallery_item"
         android:layout_width="match_parent"

@@ -1,18 +1,17 @@
-package com.example.galleryapp.test;
+package com.example.galleryapp.test.Fragment;
 
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.test.Adapter.VideoAdapter;
@@ -38,10 +37,9 @@ public class VideoFragment extends Fragment {
     private void initView() {
         rvVideos = view.findViewById(R.id.rv_video);
 
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
-        rvVideos.setLayoutManager(layoutManager);
-
         videoAdapter = new VideoAdapter(getContext(), videosList);
+
+        rvVideos.setLayoutManager(new GridLayoutManager(getContext(),3));
         rvVideos.setAdapter(videoAdapter);
     }
 
@@ -49,7 +47,8 @@ public class VideoFragment extends Fragment {
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] projection = {
                 MediaStore.MediaColumns.DATA,
-                MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+                MediaStore.Video.Media.BUCKET_DISPLAY_NAME
+        };
 
         try (Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, null)) {
             if (cursor != null) {

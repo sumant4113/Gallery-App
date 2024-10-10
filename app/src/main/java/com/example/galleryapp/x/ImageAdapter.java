@@ -1,4 +1,4 @@
-package com.example.galleryapp;
+package com.example.galleryapp.x;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.galleryapp.R;
 
 import java.util.ArrayList;
 

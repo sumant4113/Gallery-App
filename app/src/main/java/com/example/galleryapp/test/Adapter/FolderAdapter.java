@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.FolderActivity;
+import com.example.galleryapp.test.Activity.ViewFolderActivity;
 import com.example.galleryapp.test.Fragment.FolderFragment;
 import com.example.galleryapp.test.Model.VideoModel;
 
@@ -79,7 +79,8 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.MyClassHol
 
         holder.itemView.setOnClickListener(v -> {
             Toast.makeText(context, folderName, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(context, FolderActivity.class);
+            Intent intent = new Intent(context, ViewFolderActivity.class);
+            intent.putExtra("folderPath", folderPath);
             intent.putExtra("folderName", folderName);
             context.startActivity(intent);
 

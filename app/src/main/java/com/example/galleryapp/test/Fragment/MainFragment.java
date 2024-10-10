@@ -1,4 +1,4 @@
-package com.example.galleryapp.test;
+package com.example.galleryapp.test.Fragment;
 
 import static android.os.Environment.MEDIA_MOUNTED;
 
@@ -23,10 +23,9 @@ public class MainFragment extends Fragment {
 
     private RecyclerView rvGallery;
     private final ArrayList<String> imagesList = new ArrayList<>();
-    //    private TextView txtTotalItem;
-    private GalleryAdapter galleryAdapter;
     private View view;
-
+    private GalleryAdapter galleryAdapter;
+    //    private TextView txtTotalItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,10 +55,14 @@ public class MainFragment extends Fragment {
     public void loadImages() {
         if (getContext() != null) {
             if (Environment.getExternalStorageState().equals(MEDIA_MOUNTED)) {
-                final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID};
+                final String[] columns = {
+                        MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID
+                };
                 final String order = MediaStore.Images.Media.DATE_TAKEN + " DESC";
 
-                Cursor cursor = getContext().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, order);
+                Cursor cursor = getContext().getContentResolver()
+                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                columns, null, null, order);
                 if (cursor != null) {
                     try {
                         int count = cursor.getCount();
