@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -34,10 +35,18 @@ public class FolderFragment extends Fragment {
     private RecyclerView rvFolder;
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        videoModelList = fetchAllVideos(requireContext());
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_folder, container, false);
         rvFolder = view.findViewById(R.id.rv_folder);
 
+        videoModelList = fetchAllVideos(requireContext());
         initView();
         return view;
     }
@@ -51,11 +60,15 @@ public class FolderFragment extends Fragment {
                 folderAdapter = new FolderAdapter(getContext(), folderList, videoModelList);
                 rvFolder.setAdapter(folderAdapter);
 
-                rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false));
+                // solve recycle view lag
+                rvFolder.setHasFixedSize(true);
+                rvFolder.setItemViewCacheSize(30);
+                rvFolder.setDrawingCacheEnabled(true);
+                rvFolder.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+                rvFolder.setNestedScrollingEnabled(false);
 //            folderAdapter.notifyDataSetChanged();
 
-                rvFolder.setItemViewCacheSize(20);  // Increase the cache size for smoother scrolling
-                rvFolder.setHasFixedSize(true);  // If the size of RecyclerView won't change
+                rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false));
             } else {
                 folderAdapter.updateVideoList(videoModelList);
             }

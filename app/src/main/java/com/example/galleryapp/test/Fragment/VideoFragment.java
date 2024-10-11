@@ -38,6 +38,12 @@ public class VideoFragment extends Fragment {
         rvVideos = view.findViewById(R.id.rv_video);
 
         videoAdapter = new VideoAdapter(getContext(), videosList);
+        // solve recycle view lag
+        rvVideos.setHasFixedSize(true);
+        rvVideos.setItemViewCacheSize(50);
+        rvVideos.setDrawingCacheEnabled(true);
+        rvVideos.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        rvVideos.setNestedScrollingEnabled(false);
 
         rvVideos.setLayoutManager(new GridLayoutManager(getContext(),3));
         rvVideos.setAdapter(videoAdapter);

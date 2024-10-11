@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,11 +18,11 @@ import com.example.galleryapp.test.Adapter.FVideosAdapter;
 import com.example.galleryapp.test.Model.VideoModel;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ViewFolderActivity extends AppCompatActivity {
 
     private static final String TAG = "ViewFolderActivity";
-
     private RecyclerView rvFolder;
 
     private FVideosAdapter fVideosAdapter;
@@ -57,6 +58,14 @@ public class ViewFolderActivity extends AppCompatActivity {
         videoInFolder = getAllVideoFromFolder(this, folderName);
         if (folderName != null && videoInFolder.size() > 0) {
             fVideosAdapter = new FVideosAdapter(this, videoInFolder);
+
+            // solve recycle view lag
+            rvFolder.setHasFixedSize(true);
+            rvFolder.setItemViewCacheSize(50);
+            rvFolder.setDrawingCacheEnabled(true);
+            rvFolder.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+            rvFolder.setNestedScrollingEnabled(false);
+
             rvFolder.setLayoutManager(new GridLayoutManager(this, 3));
             rvFolder.setAdapter(fVideosAdapter);
         } else {
@@ -74,11 +83,11 @@ public class ViewFolderActivity extends AppCompatActivity {
                 MediaStore.Video.Media.DATA,
                 MediaStore.Video.Media.TITLE,
                 MediaStore.Video.Media.SIZE,
-                MediaStore.Video.Media.HEIGHT,
+                MediaStore.Video.Media.RESOLUTION,
                 MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.DISPLAY_NAME,
                 MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
-                MediaStore.Video.Media.RESOLUTION
+                MediaStore.Video.Media.HEIGHT
         };
 
         String selection = MediaStore.Video.Media.DATA + " like?";
@@ -92,11 +101,11 @@ public class ViewFolderActivity extends AppCompatActivity {
                 String path = cursor.getString(1);
                 String title = cursor.getString(2);
                 int size = cursor.getInt(3);
-                String height = cursor.getString(4);
+                String resolution = cursor.getString(4);
                 int duration = cursor.getInt(5);
                 String displayName = cursor.getString(6);
                 String bucketDisplayName = cursor.getString(7);
-                String resolution = cursor.getString(8);
+                String widthHeight = cursor.getString(8);
 
                 String humanCanRead = null;
                 if (size < 1024) {
@@ -111,15 +120,23 @@ public class ViewFolderActivity extends AppCompatActivity {
 
                 String durationFormatted;
                 int sec = (duration / 1000) % 60;
-                int min = (duration / 1000 * 60) % 60;
-                int hr = (duration / 1000 * 60 * 60);
+                int min = (duration / (1000 * 60)) % 60;
+                int hrs = (duration / (1000 * 60 * 60));
 
+                if (hrs == 0) {
+                    durationFormatted = String.valueOf(min).concat(":".concat(String.format(Locale.UK, "%02d", sec)));
+                } else {
+                    durationFormatted = String.valueOf(hrs).concat(":".concat(String.format(Locale.UK, "%02d", min)
+                            .concat(String.format(Locale.UK, "%02d", sec))));
+                }
 
-
+                VideoModel videoModel = new VideoModel(id, path, title, humanCanRead, resolution, durationFormatted, displayName, widthHeight);
+                if (folderName.endsWith(bucketDisplayName))
+                    videoModelList.add(videoModel);
             }
+            cursor.close();
         }
-
-        return null;
+        return videoModelList;
     }
 
 

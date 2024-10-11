@@ -5,7 +5,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -32,18 +34,18 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
     private LinearLayout llBottomSheet;
-    //    public static RelativeLayout ;
-    public static LinearLayout layoutBottom, layoutTop;
+    public LinearLayout layoutBottom, layoutTop;
     private ViewPager vpFullPhoto;
     private RelativeLayout mainLayout;
     private VPPhotoAdapter viewPagerPhotoAdapter;
     private ArrayList<String> imageList = new ArrayList<>();
-    private boolean isWhiteBG = true;
+    private boolean isWhiteBG = false;
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate;
-    private TextView txtImgTime;
+    private TextView txtImgDate, txtImgTime;
     private int position;
+    private GestureDetector gestureDetector;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +53,57 @@ public class ViewPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_picture);
 
         initView();
+
+        // Set up Gesture Detector
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                toggleVisibility();
+                return true;
+            }
+        });
+// activity open time only show photo
+        enterFullScreen();
+
         vpFullPhoto.setOnClickListener(view -> toggleVisibility());
     }
 
+    private void enterFullScreen() {
+//        Window window = getWindow();
+//        window.getDecorView().setSystemUiVisibility(
+//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // Hide navigation bar
+//                        | View.SYSTEM_UI_FLAG_FULLSCREEN // Hide status bar
+//                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // Keep the mode sticky
+//        );+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            getWindow().getInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
+        }
+    }
+
     public void toggleVisibility() {
-        /*if (isWhiteBG) {
+        if (layoutTop.getVisibility() == View.VISIBLE) {
+            layoutTop.setVisibility(View.GONE);
+            layoutBottom.setVisibility(View.GONE);
+            mainLayout.setBackgroundColor(Color.BLACK);
+            enterFullScreen();
+        } else {
+            layoutTop.setVisibility(View.VISIBLE);
+            layoutBottom.setVisibility(View.VISIBLE);
+            mainLayout.setBackgroundColor(Color.WHITE);
+            exitFullScreen();
+        }
+    }
+
+    /* public void toggleVisibility() {
+     *//*if (isWhiteBG) {
             layoutTop.setVisibility(View.GONE);
             layoutBottom.setVisibility(View.GONE);
 //            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
@@ -77,12 +125,28 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(Color.WHITE);
             mainLayout.setBackgroundColor(Color.WHITE);
             isWhiteBG = true;
-        }*/
-        if (isWhiteBG) {
+        }*//*
+
+        if (!isWhiteBG) {
+            // Hide all and show only photo
             layoutTop.setVisibility(View.GONE);
             layoutBottom.setVisibility(View.GONE);
             mainLayout.setBackgroundColor(Color.BLACK);
+            enterFullScreen();
+            isWhiteBG = true;
+        } else {
+            // Show all with photo
+            layoutTop.setVisibility(View.VISIBLE);
+            layoutBottom.setVisibility(View.VISIBLE);
+            mainLayout.setBackgroundColor(Color.WHITE);
+            exitFullScreen();
+            isWhiteBG = false;
+        }
 
+        *//*if (isWhiteBG) {
+            layoutTop.setVisibility(View.GONE);
+            layoutBottom.setVisibility(View.GONE);
+            mainLayout.setBackgroundColor(Color.BLACK);
             WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
             // API 30 thi less
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -110,6 +174,19 @@ public class ViewPictureActivity extends AppCompatActivity {
 //                getWindow().getInsetsController().setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH);
             }
             isWhiteBG = true;
+        }*//*
+    }*/
+
+    private void exitFullScreen() {
+//        Window window = getWindow();
+//        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            getWindow().getInsetsController().show(WindowInsetsCompat.Type.statusBars());
+            getWindow().getInsetsController().show(WindowInsetsCompat.Type.navigationBars());
         }
     }
 
@@ -131,7 +208,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         // Initialize BottomSheet
         llBottomSheet = findViewById(R.id.ll_bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
-
 
 
         if (getIntent().getExtras() != null) {
@@ -156,7 +232,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                if (!isWhiteBG) {
+                if (isWhiteBG) {
                     mainLayout.setBackgroundColor(Color.BLACK);
                 }
             }

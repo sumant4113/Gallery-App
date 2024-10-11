@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="150sp"
-    android:layout_height="200sp"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginHorizontal="1dp"
+    android:layout_marginVertical="1dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,14 +17,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
-            android:src="@drawable/img_sample" />
+            android:src="@drawable/img_semple" />
 
         <ImageView
             android:id="@+id/img_playBtn"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="15sp"
+            android:layout_height="15sp"
             android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
+            android:layout_marginStart="5dp"
+            android:layout_marginBottom="5dp"
             android:scaleType="centerCrop"
             android:src="@drawable/img_play" />
 
@@ -31,11 +35,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginStart="20sp"
-            android:layout_marginBottom="0dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginBottom="3dp"
+            android:layout_toEndOf="@+id/img_playBtn"
             android:text="0:00"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
     </RelativeLayout>
 

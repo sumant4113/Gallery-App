@@ -46,6 +46,13 @@ public class MainFragment extends Fragment {
         galleryAdapter = new GalleryAdapter(getContext(), imagesList);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+        // solve recycle view lag
+        rvGallery.setHasFixedSize(true);
+        rvGallery.setItemViewCacheSize(50);
+        rvGallery.setDrawingCacheEnabled(true);
+        rvGallery.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        rvGallery.setNestedScrollingEnabled(false);
+
         rvGallery.setLayoutManager(layoutManager);
         rvGallery.setAdapter(galleryAdapter);
         rvGallery.setNestedScrollingEnabled(false);

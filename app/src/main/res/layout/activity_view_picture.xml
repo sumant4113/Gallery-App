@@ -9,7 +9,7 @@
         android:id="@+id/main_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:background="@color/black">
 
         <!-- ViewPager for Swiping Images -->
         <androidx.viewpager.widget.ViewPager
@@ -23,7 +23,6 @@
             android:layout_centerInParent="true" />
 
         <!-- Top Relative Layout -->
-
         <LinearLayout
             android:id="@+id/layout_top"
             android:layout_width="match_parent"
@@ -32,7 +31,8 @@
             android:background="@color/white"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingVertical="7dp">
+            android:paddingVertical="7dp"
+            android:visibility="invisible">
 
             <ImageView
                 android:id="@+id/img_backBtn"
@@ -89,7 +89,8 @@
             android:orientation="horizontal"
             android:paddingHorizontal="20dp"
             android:paddingTop="15dp"
-            android:paddingBottom="15dp">
+            android:paddingBottom="15dp"
+            android:visibility="invisible">
 
             <ImageView
                 android:id="@+id/img_share"
@@ -127,12 +128,9 @@
                 android:src="@drawable/img_dots" />
         </LinearLayout>
 
-
     </RelativeLayout>
 
-
-<!--    Bottom Sheet Layout-->
-
+    <!--    Bottom Sheet Layout-->
     <LinearLayout
         android:id="@+id/ll_bottomSheet"
         android:layout_width="match_parent"
