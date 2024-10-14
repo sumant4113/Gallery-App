@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Model;
+package com.example.galleryapp.main.Model;
 
 public class ImageModel extends MediaModel {
     String dateTaken;

@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Fragment;
+package com.example.galleryapp.main.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -20,8 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.FolderAdapter;
-import com.example.galleryapp.test.Model.VideoModel;
+import com.example.galleryapp.main.Adapter.FolderRvAdapter;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class FolderFragment extends Fragment {
     private static final String TAG = "FolderFragment";
     private ArrayList<VideoModel> videoModelList = new ArrayList<>();
     private ArrayList<String> folderList = new ArrayList<>();
-    private FolderAdapter folderAdapter;
+    private FolderRvAdapter folderRvAdapter;
     private RecyclerView rvFolder;
 
     @Override
@@ -46,7 +46,6 @@ public class FolderFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_folder, container, false);
         rvFolder = view.findViewById(R.id.rv_folder);
 
-        videoModelList = fetchAllVideos(requireContext());
         initView();
         return view;
     }
@@ -56,9 +55,9 @@ public class FolderFragment extends Fragment {
         videoModelList = fetchAllVideos(requireContext());
 
         if (folderList != null && !folderList.isEmpty() && videoModelList != null) {
-            if (folderAdapter == null) {
-                folderAdapter = new FolderAdapter(getContext(), folderList, videoModelList);
-                rvFolder.setAdapter(folderAdapter);
+            if (folderRvAdapter == null) {
+                folderRvAdapter = new FolderRvAdapter(getContext(), folderList, videoModelList);
+                rvFolder.setAdapter(folderRvAdapter);
 
                 // solve recycle view lag
                 rvFolder.setHasFixedSize(true);
@@ -70,7 +69,7 @@ public class FolderFragment extends Fragment {
 
                 rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false));
             } else {
-                folderAdapter.updateVideoList(videoModelList);
+                folderRvAdapter.updateVideoList(videoModelList);
             }
 
         } else {

@@ -1,10 +1,9 @@
-package com.example.galleryapp.test.Activity;
+package com.example.galleryapp.main.Activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -15,7 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.VPVideoAdapter;
+import com.example.galleryapp.main.Adapter.VPVideoAdapter;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 
@@ -29,7 +29,11 @@ public class ViewVideoActivity extends AppCompatActivity {
     private TextView txtImgTime;
     private ViewPager vpFullVideo;
     private VPVideoAdapter vpVideoAdapter;
+
     private ArrayList<String> videoArrayList = new ArrayList<>();
+    // For FolderVideo To video
+    private ArrayList<VideoModel> videoModelArrayList = new ArrayList<>();
+
     //    public static ImageView imgPlayVideoBtn;
     private boolean isWhiteBG = true;
     int position = -1;
@@ -37,17 +41,48 @@ public class ViewVideoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_view_video);
 
         initView();
 
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
 
-        if (videoArrayList != null && !videoArrayList.isEmpty()) {
+        if (videoModelArrayList != null && !videoModelArrayList.isEmpty()){
+            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
+            vpFullVideo.setAdapter(vpVideoAdapter);
+            vpFullVideo.setCurrentItem(position);
+
+            vpVideoAdapter.notifyDataSetChanged();
+
+            vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                }
+                @Override
+                public void onPageSelected(int position) {
+                    // Stop the current video when a new page is selected
+                    vpVideoAdapter.stopCurrentVideo();
+                    VideoView videoView = findViewById(R.id.video_view);
+                    if (videoView.isPlaying()) {
+                        videoView.stopPlayback();
+                    }
+                }
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    VideoView videoView = findViewById(R.id.video_view);
+                    if (videoView.isPlaying()) {
+                        videoView.stopPlayback();
+                        vpVideoAdapter.stopCurrentVideo();
+                    }
+                }
+            });
+        }
+
+        /*if (videoArrayList != null && !videoArrayList.isEmpty()) {
             vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoArrayList);
             vpFullVideo.setAdapter(vpVideoAdapter);
             vpFullVideo.setCurrentItem(position);
@@ -80,10 +115,10 @@ public class ViewVideoActivity extends AppCompatActivity {
                     }
                 }
             });
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) {
@@ -92,7 +127,8 @@ public class ViewVideoActivity extends AppCompatActivity {
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN |
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-    }
+    }*/
+
 
     public void toggleVisibility() {
         if (!isWhiteBG) {
@@ -129,14 +165,21 @@ public class ViewVideoActivity extends AppCompatActivity {
 
         imgBackBtn.setOnClickListener(v -> onBackPressed());
 
-
         if (getIntent() != null) {
+
+            Intent intent = getIntent();
+            videoModelArrayList = intent.getParcelableArrayListExtra("video_path");
+            position = intent.getIntExtra("position", -1);
+
+        }
+
+       /* if (getIntent() != null) {
             videoArrayList = getIntent().getStringArrayListExtra("video_path");
             position = getIntent().getIntExtra("position", -1);
 
             String path = videoArrayList.get(position);
 
-        }
+        }*/
         /*// Add page change listener to ViewPager
         vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

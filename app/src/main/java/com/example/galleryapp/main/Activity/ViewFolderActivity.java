@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Activity;
+package com.example.galleryapp.main.Activity;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.FVideosAdapter;
-import com.example.galleryapp.test.Model.VideoModel;
+import com.example.galleryapp.main.Adapter.FVideosRvAdapter;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -25,7 +25,7 @@ public class ViewFolderActivity extends AppCompatActivity {
     private static final String TAG = "ViewFolderActivity";
     private RecyclerView rvFolder;
 
-    private FVideosAdapter fVideosAdapter;
+    private FVideosRvAdapter fVideosRvAdapter;
     private ArrayList<VideoModel> videoInFolder = new ArrayList<>();
     private String folderPath, folderName;
     private TextView txtFolderName;
@@ -46,7 +46,6 @@ public class ViewFolderActivity extends AppCompatActivity {
         if (getIntent() != null) {
             folderPath = getIntent().getStringExtra("folderPath");
             folderName = getIntent().getStringExtra("folderName");
-
         }
         txtFolderName.setText(folderName);
 
@@ -56,8 +55,8 @@ public class ViewFolderActivity extends AppCompatActivity {
 
     private void loadVideos() {
         videoInFolder = getAllVideoFromFolder(this, folderName);
-        if (folderName != null && videoInFolder.size() > 0) {
-            fVideosAdapter = new FVideosAdapter(this, videoInFolder);
+        if (folderName != null && !videoInFolder.isEmpty()) {
+            fVideosRvAdapter = new FVideosRvAdapter(this, videoInFolder);
 
             // solve recycle view lag
             rvFolder.setHasFixedSize(true);
@@ -67,7 +66,7 @@ public class ViewFolderActivity extends AppCompatActivity {
             rvFolder.setNestedScrollingEnabled(false);
 
             rvFolder.setLayoutManager(new GridLayoutManager(this, 3));
-            rvFolder.setAdapter(fVideosAdapter);
+            rvFolder.setAdapter(fVideosRvAdapter);
         } else {
             Toast.makeText(this, "can't find any video", Toast.LENGTH_SHORT).show();
         }
@@ -137,17 +136,6 @@ public class ViewFolderActivity extends AppCompatActivity {
             cursor.close();
         }
         return videoModelList;
-    }
-
-
-    private ArrayList<VideoModel> fetchVideosInFolder(String folderPath) {
-        ArrayList<VideoModel> videos = new ArrayList<>();
-        for (VideoModel video : videoInFolder) {
-            if (video.getPath().contains(folderPath)) {
-                videos.add(video);
-            }
-        }
-        return videos;
     }
 
 }

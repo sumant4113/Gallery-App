@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.ViewPictureActivity;
+import com.example.galleryapp.main.Activity.ViewPictureActivity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,13 +26,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
+public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.ViewHolder> {
 
     private static final String TAG = "GalleryAdapter";
     private final Context context;
     private ArrayList<String> image_list = new ArrayList<>();
 
-    public GalleryAdapter(Context context, ArrayList<String> image_list) {
+    public GalleryRvAdapter(Context context, ArrayList<String> image_list) {
         this.context = context;
         this.image_list = image_list;
     }

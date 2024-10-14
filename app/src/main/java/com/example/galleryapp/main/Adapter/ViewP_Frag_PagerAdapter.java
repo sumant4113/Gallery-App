@@ -1,17 +1,17 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.example.galleryapp.test.Fragment.FolderFragment;
-import com.example.galleryapp.test.Fragment.MainFragment;
-import com.example.galleryapp.test.Fragment.VideoFragment;
+import com.example.galleryapp.main.Fragment.FolderFragment;
+import com.example.galleryapp.main.Fragment.MainFragment;
+import com.example.galleryapp.main.Fragment.VideoFragment;
 
-public class ViewPagerGalleryAdapter extends FragmentPagerAdapter {
+public class ViewP_Frag_PagerAdapter extends FragmentPagerAdapter {
 
-    public ViewPagerGalleryAdapter(@NonNull FragmentManager fm) {
+    public ViewP_Frag_PagerAdapter(@NonNull FragmentManager fm) {
         super(fm);
     }
 

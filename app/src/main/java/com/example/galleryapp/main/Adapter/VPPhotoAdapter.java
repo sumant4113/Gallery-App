@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
 import android.util.Log;
@@ -12,11 +12,11 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.Target;
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.ViewPictureActivity;
+import com.example.galleryapp.main.Activity.ViewPictureActivity;
 import com.ortiz.touchview.TouchImageView;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class VPPhotoAdapter extends PagerAdapter {
@@ -36,7 +36,7 @@ public class VPPhotoAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(@   NonNull View view, @NonNull Object object) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
         return view.equals(object);
     }
 
@@ -44,7 +44,7 @@ public class VPPhotoAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         String imgPath = imageList.get(position);
-        File image_file = new File(imageList.get(position));
+//        File image_file = new File(imageList.get(position));
 
         View view = LayoutInflater.from(context).inflate(R.layout.item_image_slider, container, false);
         TouchImageView imgFullPhoto = view.findViewById(R.id.img_fullPhoto);
@@ -58,6 +58,7 @@ public class VPPhotoAdapter extends PagerAdapter {
         try {
             Glide.with(context).load(imgPath)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .override(Target.SIZE_ORIGINAL)
                     .into(imgFullPhoto);
         } catch (Exception e) {
             Toast.makeText(context, "Glide Fail" + e.getMessage(), Toast.LENGTH_SHORT).show();

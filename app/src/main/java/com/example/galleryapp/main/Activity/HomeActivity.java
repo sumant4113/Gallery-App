@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Activity;
+package com.example.galleryapp.main.Activity;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -12,9 +12,9 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.ViewPagerGalleryAdapter;
-import com.example.galleryapp.test.Fragment.MainFragment;
-import com.example.galleryapp.test.PermissionManager;
+import com.example.galleryapp.main.Adapter.ViewP_Frag_PagerAdapter;
+import com.example.galleryapp.main.Fragment.MainFragment;
+import com.example.galleryapp.main.PermissionManager;
 import com.google.android.material.tabs.TabLayout;
 
 public class HomeActivity extends AppCompatActivity {
@@ -49,7 +49,7 @@ public class HomeActivity extends AppCompatActivity {
 //        viewPager.setAdapter(galleryAdapter);
 //        tabLayout.setupWithViewPager(viewPager);
 
-        ViewPagerGalleryAdapter vpGAdapter = new ViewPagerGalleryAdapter(fragmentManager);
+        ViewP_Frag_PagerAdapter vpGAdapter = new ViewP_Frag_PagerAdapter(fragmentManager);
         viewPager.setAdapter(vpGAdapter);
         tabLayout.setupWithViewPager(viewPager);
     }

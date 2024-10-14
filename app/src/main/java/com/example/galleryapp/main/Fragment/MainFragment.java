@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Fragment;
+package com.example.galleryapp.main.Fragment;
 
 import static android.os.Environment.MEDIA_MOUNTED;
 
@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.GalleryAdapter;
+import com.example.galleryapp.main.Adapter.GalleryRvAdapter;
 
 import java.util.ArrayList;
 
@@ -24,7 +24,7 @@ public class MainFragment extends Fragment {
     private RecyclerView rvGallery;
     private final ArrayList<String> imagesList = new ArrayList<>();
     private View view;
-    private GalleryAdapter galleryAdapter;
+    private GalleryRvAdapter galleryRvAdapter;
     //    private TextView txtTotalItem;
 
     @Override
@@ -43,7 +43,7 @@ public class MainFragment extends Fragment {
     private void initView() {
         rvGallery = view.findViewById(R.id.rv_gallery);
 //        txtTotalItem = view.findViewById(R.id.txt_totalItem);
-        galleryAdapter = new GalleryAdapter(getContext(), imagesList);
+        galleryRvAdapter = new GalleryRvAdapter(getContext(), imagesList);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         // solve recycle view lag
@@ -54,7 +54,7 @@ public class MainFragment extends Fragment {
         rvGallery.setNestedScrollingEnabled(false);
 
         rvGallery.setLayoutManager(layoutManager);
-        rvGallery.setAdapter(galleryAdapter);
+        rvGallery.setAdapter(galleryRvAdapter);
         rvGallery.setNestedScrollingEnabled(false);
     }
 

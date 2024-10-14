@@ -1,7 +1,11 @@
-package com.example.galleryapp.test.Model;
+package com.example.galleryapp.main.Model;
 
-public class VideoModel {
+import android.os.Parcel;
+import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
+public class VideoModel implements Parcelable {
     String id;
     String path;
     String title;
@@ -11,7 +15,7 @@ public class VideoModel {
     String displayName;
     String widthHeight;
 
-    public VideoModel(String id, String path, String title, String size, String resolution, String duration, String displayName, String wh) {
+    public VideoModel(String id, String path, String title, String size, String resolution, String duration, String displayName, String widthHeight) {
         this.id = id;
         this.path = path;
         this.title = title;
@@ -19,9 +23,50 @@ public class VideoModel {
         this.resolution = resolution;
         this.duration = duration;
         this.displayName = displayName;
-        this.widthHeight = wh;
+        this.widthHeight = widthHeight;
+    }
+    // Parcelable implementation
+    protected VideoModel(Parcel in) {
+        id = in.readString();
+        path = in.readString();
+        title = in.readString();
+        size = in.readString();
+        resolution = in.readString();
+        duration = in.readString();
+        displayName = in.readString();
+        widthHeight = in.readString();
     }
 
+
+    public static final Creator<VideoModel> CREATOR = new Creator<VideoModel>() {
+        @Override
+        public VideoModel createFromParcel(Parcel in) {
+            return new VideoModel(in);
+        }
+
+        @Override
+        public VideoModel[] newArray(int size) {
+            return new VideoModel[size];
+        }
+    };
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(path);
+        dest.writeString(title);
+        dest.writeString(size);
+        dest.writeString(resolution);
+        dest.writeString(duration);
+        dest.writeString(displayName);
+        dest.writeString(widthHeight);
+    }
     public String getId() {
         return id;
     }
@@ -104,6 +149,4 @@ public class VideoModel {
 
         return true;
     }
-
-
 }

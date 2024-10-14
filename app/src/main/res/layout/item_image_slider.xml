@@ -11,17 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitCenter"
-
         android:src="@drawable/img_semple" />
 
-    <!--
-        <com.github.chrisbanes.photoview.PhotoView
+    <!--        <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/img_fullPhoto"
             android:layout_width="match_parent"
             android:src="@drawable/img_sample"
             android:layout_height="match_parent"
-            android:scaleType="fitCenter" />
-    -->
-
-
+            android:scaleType="fitCenter" />-->
 </RelativeLayout>

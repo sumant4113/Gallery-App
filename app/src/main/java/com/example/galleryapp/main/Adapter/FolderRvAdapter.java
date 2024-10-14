@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -16,20 +16,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.ViewFolderActivity;
-import com.example.galleryapp.test.Fragment.FolderFragment;
-import com.example.galleryapp.test.Model.VideoModel;
+import com.example.galleryapp.main.Activity.ViewFolderActivity;
+import com.example.galleryapp.main.Fragment.FolderFragment;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.io.File;
 import java.util.ArrayList;
 
-public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.MyClassHolder> {
+public class FolderRvAdapter extends RecyclerView.Adapter<FolderRvAdapter.MyClassHolder> {
 
     private final Context context;
     private ArrayList<String> folderNameList;
     private ArrayList<VideoModel> videoModel;
 
-    public FolderAdapter(Context context, ArrayList<String> folderNameList, ArrayList<VideoModel> videoModel) {
+    public FolderRvAdapter(Context context, ArrayList<String> folderNameList, ArrayList<VideoModel> videoModel) {
         this.context = context;
         this.folderNameList = folderNameList;
         this.videoModel = videoModel;
@@ -61,6 +61,7 @@ public class FolderAdapter extends RecyclerView.Adapter<FolderAdapter.MyClassHol
         // Extract folder name from path
         int index = folderNameList.get(position).lastIndexOf("/");
         String folderName = (index != -1) ? folderPath.substring(index + 1) : folderPath;
+//        String folderName = folderPath.substring(Math.max(index + 1, 0));
 //        String folderName = folderNameList.get(position).substring(index);
 //        String folderNAME = folderPath.substring(index + 1);
 

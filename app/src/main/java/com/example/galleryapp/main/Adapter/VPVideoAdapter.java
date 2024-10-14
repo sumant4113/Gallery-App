@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,7 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.ViewVideoActivity;
+import com.example.galleryapp.main.Activity.ViewVideoActivity;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 
@@ -20,17 +21,23 @@ public class VPVideoAdapter extends PagerAdapter {
 
     private static final String TAG = "VPVideoAdapter";
     private final Context context;
-    public static ArrayList<String> videoListPA;
+//    public static ArrayList<String> videoListPA;
+    public ArrayList<VideoModel> videoModelArrayList;
     private VideoView currentVideoView; // To keep track of the currently playing video
 
-    public VPVideoAdapter(Context context, ArrayList<String> videoList) {
+    public VPVideoAdapter(Context context, ArrayList<VideoModel> videoModelArrayList) {
+        this.context = context;
+        this.videoModelArrayList = videoModelArrayList;
+    }
+
+/*    public VPVideoAdapter(Context context, ArrayList<String> videoList) {
         this.context = context;
         this.videoListPA = videoList;
-    }
+    }*/
 
     @Override
     public int getCount() {
-        return videoListPA.size();
+        return videoModelArrayList.size();
     }
 
     @Override
@@ -41,15 +48,18 @@ public class VPVideoAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        String vidPath = videoListPA.get(position);
+//        String vidPath = videoListPA.get(position);
+        VideoModel videoModel = videoModelArrayList.get(position);
+
         View view = LayoutInflater.from(context).inflate(R.layout.item_video_slider, container, false);
 
         VideoView videoView = view.findViewById(R.id.video_view);
         MediaController mediaController = new MediaController(context);
         mediaController.setAnchorView(videoView);
-
         videoView.setMediaController(mediaController);
-        videoView.setVideoURI(Uri.parse(vidPath));
+
+//        videoView.setVideoURI(Uri.parse(vidPath));
+        videoView.setVideoURI(Uri.parse(videoModel.getPath()));
 
 
         videoView.setOnClickListener(view1 -> {

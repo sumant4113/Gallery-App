@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Adapter;
+package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,16 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Activity.ViewVideoActivity;
+import com.example.galleryapp.main.Activity.ViewVideoActivity;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 
-public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> {
+public class VideoRvAdapter extends RecyclerView.Adapter<VideoRvAdapter.ViewHolder> {
 
     private final Context context;
-    private ArrayList<String> videoList;
+    private ArrayList<VideoModel> videoList;
 
-    public VideoAdapter(Context context, ArrayList<String> videoList) {
+    public VideoRvAdapter(Context context, ArrayList<VideoModel> videoList) {
         this.context = context;
         this.videoList = videoList;
     }
@@ -37,13 +38,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Load video thumbnail using Glide
-        String videoPath = videoList.get(position);
+        VideoModel videoModel = videoList.get(position);
 
 /*        Picasso.get().load(videoPath).resize(50, 50)
             .error(R.drawable.img_error).placeholder(R.drawable.baseline_photo_library_24).centerCrop().into(holder.videoThumbnail);*/
 
         Glide.with(context)
-                .load(videoPath) // Load video thumbnail
+                .load(videoModel) // Load video thumbnail
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .error(R.drawable.img_error)// Error image
                 .fitCenter()
@@ -53,7 +54,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
         holder.videoThumbnail.setOnClickListener(view -> {
             Intent intent = new Intent(context, ViewVideoActivity.class);
-            intent.putStringArrayListExtra("video_path", videoList);
+            intent.putParcelableArrayListExtra("video_path", videoList);
             intent.putExtra("position", position);
             context.startActivity(intent);
         });

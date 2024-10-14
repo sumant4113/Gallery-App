@@ -1,4 +1,4 @@
-package com.example.galleryapp.test.Fragment;
+package com.example.galleryapp.main.Fragment;
 
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.VideoAdapter;
+import com.example.galleryapp.main.Adapter.VideoRvAdapter;
+import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
 
@@ -23,8 +24,8 @@ public class VideoFragment extends Fragment {
     private RecyclerView rvVideos;
     private static final String TAG = "VideoFragment";
     private View view;
-    private VideoAdapter videoAdapter;
-    private final ArrayList<String> videosList = new ArrayList<>();
+    private VideoRvAdapter videoRvAdapter;
+    private final ArrayList<VideoModel> videosList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -37,16 +38,16 @@ public class VideoFragment extends Fragment {
     private void initView() {
         rvVideos = view.findViewById(R.id.rv_video);
 
-        videoAdapter = new VideoAdapter(getContext(), videosList);
+        videoRvAdapter = new VideoRvAdapter(getContext(), videosList);
         // solve recycle view lag
         rvVideos.setHasFixedSize(true);
-        rvVideos.setItemViewCacheSize(50);
+        rvVideos.setItemViewCacheSize(20);
         rvVideos.setDrawingCacheEnabled(true);
         rvVideos.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
         rvVideos.setNestedScrollingEnabled(false);
 
         rvVideos.setLayoutManager(new GridLayoutManager(getContext(),3));
-        rvVideos.setAdapter(videoAdapter);
+        rvVideos.setAdapter(videoRvAdapter);
     }
 
     private void loadVideos() {
@@ -62,9 +63,9 @@ public class VideoFragment extends Fragment {
 
                 while (cursor.moveToNext()) {
                     String absolutePathOfVideo = cursor.getString(columnIndexData);
-                    videosList.add(absolutePathOfVideo);  // Add video paths to the list
+//                    videosList.add(absolutePathOfVideo);  // Add video paths to the list
                 }
-                videoAdapter.notifyDataSetChanged();  // Notify adapter that data has changed
+                videoRvAdapter.notifyDataSetChanged();  // Notify adapter that data has changed
             }
         } catch (Exception e) {
             Log.e(TAG, "Error loading videos: " + e.getMessage());

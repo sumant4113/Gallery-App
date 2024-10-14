@@ -1,10 +1,11 @@
-package com.example.galleryapp.test.Activity;
+package com.example.galleryapp.main.Activity;
 
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -25,15 +26,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.test.Adapter.VPPhotoAdapter;
+import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
 public class ViewPictureActivity extends AppCompatActivity {
 
+    private static final String TAG = "BottomSheet";
+
+    // BottomSheetProperty
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
     private LinearLayout llBottomSheet;
+
     public LinearLayout layoutBottom, layoutTop;
     private ViewPager vpFullPhoto;
     private RelativeLayout mainLayout;
@@ -42,10 +47,9 @@ public class ViewPictureActivity extends AppCompatActivity {
     private boolean isWhiteBG = false;
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate, txtImgTime;
+    private TextView txtImgDate, txtImgTime, txtDateTime, txtImgName, txtImgMp, txtImgResolution, txtOnDeviceSize, txtFilePath;
     private int position;
     private GestureDetector gestureDetector;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,11 @@ public class ViewPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_picture);
 
         initView();
+
+        // In This Activity shows full Image
+        /*View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(uiOptions);*/
 
         // Set up Gesture Detector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -209,6 +218,15 @@ public class ViewPictureActivity extends AppCompatActivity {
         llBottomSheet = findViewById(R.id.ll_bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
 
+        txtDateTime = findViewById(R.id.txt_dateTime);
+        txtImgName = findViewById(R.id.txt_imgName);
+        txtImgMp = findViewById(R.id.txt_imgMP);
+        txtImgResolution = findViewById(R.id.txt_imgResolution);
+        txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
+        txtFilePath = findViewById(R.id.txt_filePath);
+
+        txtImgName.setText("");
+
 
         if (getIntent().getExtras() != null) {
             // Get Data from Intent
@@ -232,6 +250,9 @@ public class ViewPictureActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
                 if (isWhiteBG) {
                     mainLayout.setBackgroundColor(Color.BLACK);
                 }
@@ -239,17 +260,24 @@ public class ViewPictureActivity extends AppCompatActivity {
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
             }
         });
 
         setBottomSheetBehavior();
 
         imgMore.setOnClickListener(v -> {
-            if (bottomSheetBehavior.getState() != bottomSheetBehavior.STATE_COLLAPSED) {
+
+//            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                // Expand the bottom sheet
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             } else {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                // Collapse the bottom sheet
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);  // Or use STATE_COLLAPSED
             }
         });
 
@@ -258,9 +286,42 @@ public class ViewPictureActivity extends AppCompatActivity {
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         txtImgDate.setText("set Karo");
 
+
     }
 
     private void setBottomSheetBehavior() {
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottomSheet));
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        Log.d("BottomSheet", "STATE_EXPANDED");
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        Log.d("BottomSheet", "STATE_COLLAPSED");
+                        break;
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                        Log.d("BottomSheet", "STATE_HIDDEN");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Handle slide behavior if needed
+            }
+        });
+
+        // Initially hide the bottom sheet
+        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
+
+/*    private void setBottomSheetBehavior() {
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -277,11 +338,10 @@ public class ViewPictureActivity extends AppCompatActivity {
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
             }
         });
-
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
     }
+*/
 
 
     private void showBottomDialog() {
@@ -309,8 +369,12 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        } else {
+            super.onBackPressed();
+        }
+//        finish();
     }
 
 }

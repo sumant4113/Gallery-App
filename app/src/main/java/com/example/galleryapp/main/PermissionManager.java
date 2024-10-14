@@ -1,4 +1,4 @@
-package com.example.galleryapp.test;
+package com.example.galleryapp.main;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
