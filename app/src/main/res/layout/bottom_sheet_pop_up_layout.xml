@@ -57,7 +57,7 @@
             android:paddingHorizontal="20sp">
 
             <TextView
-                android:id="@+id/txt_imgName"
+                android:id="@+id/txt_vidName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
@@ -68,13 +68,13 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/txt_imgMP"
+                android:id="@+id/txt_vidMP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="1.2MP"
-                app:layout_constraintStart_toStartOf="@id/txt_imgName"
-                app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
+                app:layout_constraintStart_toStartOf="@id/txt_vidName"
+                app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
 
             <TextView
                 android:id="@+id/txt_bollet"
@@ -83,18 +83,18 @@
                 android:layout_marginStart="7dp"
                 android:layout_marginTop="2dp"
                 android:text="•"
-                app:layout_constraintStart_toEndOf="@id/txt_imgMP"
-                app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
+                app:layout_constraintStart_toEndOf="@id/txt_vidMP"
+                app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
 
             <TextView
-                android:id="@+id/txt_imgResolution"
+                android:id="@+id/txt_vidResolution"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="7dp"
                 android:layout_marginTop="2dp"
                 android:text="720 x 1600"
                 app:layout_constraintStart_toEndOf="@id/txt_bollet"
-                app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
+                app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

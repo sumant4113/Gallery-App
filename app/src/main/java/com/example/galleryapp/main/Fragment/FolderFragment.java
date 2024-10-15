@@ -93,7 +93,8 @@ public class FolderFragment extends Fragment {
                 MediaStore.Video.Media.HEIGHT,
                 MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.RESOLUTION
+                MediaStore.Video.Media.RESOLUTION,
+                MediaStore.Video.Media.DATE_ADDED
         };
 
         Cursor cursor = context.getContentResolver().query(uri, projection, null, null, orderBy);
@@ -107,8 +108,9 @@ public class FolderFragment extends Fragment {
                 String duration = cursor.getString(5);
                 String displayName = cursor.getString(6);
                 String resolution = cursor.getString(7);
+                String dateTime = cursor.getString(8);
 
-                VideoModel videoFiles = new VideoModel(id, path, title, size, resolution, duration, displayName, width_height);
+                VideoModel videoFiles = new VideoModel(id, path, title, size, resolution, duration, displayName, width_height, dateTime);
 
                 int slashFirstIndex = path.lastIndexOf("/");
                 String subString = path.substring(0, slashFirstIndex);

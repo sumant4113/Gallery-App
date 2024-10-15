@@ -24,11 +24,10 @@ public class ViewFolderActivity extends AppCompatActivity {
 
     private static final String TAG = "ViewFolderActivity";
     private RecyclerView rvFolder;
-
     private FVideosRvAdapter fVideosRvAdapter;
     private ArrayList<VideoModel> videoInFolder = new ArrayList<>();
-    private String folderPath, folderName;
     private TextView txtFolderName;
+    private String folderPath, folderName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +85,8 @@ public class ViewFolderActivity extends AppCompatActivity {
                 MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.DISPLAY_NAME,
                 MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
-                MediaStore.Video.Media.HEIGHT
+                MediaStore.Video.Media.HEIGHT,
+                MediaStore.Video.Media.DATE_ADDED
         };
 
         String selection = MediaStore.Video.Media.DATA + " like?";
@@ -105,7 +105,9 @@ public class ViewFolderActivity extends AppCompatActivity {
                 String displayName = cursor.getString(6);
                 String bucketDisplayName = cursor.getString(7);
                 String widthHeight = cursor.getString(8);
+                String dateTime = cursor.getString(9);
 
+                // Size
                 String humanCanRead = null;
                 if (size < 1024) {
                     humanCanRead = String.format(context.getString(R.string.size_bytes), (double) size);
@@ -117,6 +119,7 @@ public class ViewFolderActivity extends AppCompatActivity {
                     humanCanRead = String.format(context.getString(R.string.size_gb), (double) size / Math.pow(1024, 3));
                 }
 
+                // Duration
                 String durationFormatted;
                 int sec = (duration / 1000) % 60;
                 int min = (duration / (1000 * 60)) % 60;
@@ -129,7 +132,8 @@ public class ViewFolderActivity extends AppCompatActivity {
                             .concat(String.format(Locale.UK, "%02d", sec))));
                 }
 
-                VideoModel videoModel = new VideoModel(id, path, title, humanCanRead, resolution, durationFormatted, displayName, widthHeight);
+                // Give to Model Class
+                VideoModel videoModel = new VideoModel(id, path, title, humanCanRead, resolution, durationFormatted, displayName, widthHeight, dateTime);
                 if (folderName.endsWith(bucketDisplayName))
                     videoModelList.add(videoModel);
             }

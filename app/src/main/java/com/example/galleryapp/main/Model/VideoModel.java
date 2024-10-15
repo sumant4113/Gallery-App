@@ -14,8 +14,9 @@ public class VideoModel implements Parcelable {
     String duration;
     String displayName;
     String widthHeight;
+    String dataAdded;
 
-    public VideoModel(String id, String path, String title, String size, String resolution, String duration, String displayName, String widthHeight) {
+    public VideoModel(String id, String path, String title, String size, String resolution, String duration, String displayName, String widthHeight, String dataAdded) {
         this.id = id;
         this.path = path;
         this.title = title;
@@ -24,6 +25,7 @@ public class VideoModel implements Parcelable {
         this.duration = duration;
         this.displayName = displayName;
         this.widthHeight = widthHeight;
+        this.dataAdded = dataAdded;
     }
     // Parcelable implementation
     protected VideoModel(Parcel in) {
@@ -35,6 +37,7 @@ public class VideoModel implements Parcelable {
         duration = in.readString();
         displayName = in.readString();
         widthHeight = in.readString();
+        dataAdded = in.readString();
     }
 
 
@@ -66,7 +69,17 @@ public class VideoModel implements Parcelable {
         dest.writeString(duration);
         dest.writeString(displayName);
         dest.writeString(widthHeight);
+        dest.writeString(dataAdded);
     }
+
+    public String getDataAdded() {
+        return dataAdded;
+    }
+
+    public void setDataAdded(String dataAdded) {
+        this.dataAdded = dataAdded;
+    }
+
     public String getId() {
         return id;
     }
@@ -146,6 +159,7 @@ public class VideoModel implements Parcelable {
         if (duration != null ? !duration.equals(videoModel.duration) : videoModel.duration != null) return false;
         if (displayName != null ? !displayName.equals(videoModel.displayName) : videoModel.displayName != null) return false;
         if (widthHeight != null ? !widthHeight.equals(videoModel.widthHeight) : videoModel.widthHeight != null) return false;
+        if (dataAdded != null? !dataAdded.equals(videoModel.dataAdded) : videoModel.dataAdded != null) return false;
 
         return true;
     }

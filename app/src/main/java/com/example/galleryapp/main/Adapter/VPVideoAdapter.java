@@ -61,7 +61,6 @@ public class VPVideoAdapter extends PagerAdapter {
 //        videoView.setVideoURI(Uri.parse(vidPath));
         videoView.setVideoURI(Uri.parse(videoModel.getPath()));
 
-
         videoView.setOnClickListener(view1 -> {
             if (context instanceof ViewVideoActivity) {
                 if (videoView.isPlaying()) {

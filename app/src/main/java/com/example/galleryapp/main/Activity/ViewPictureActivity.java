@@ -219,9 +219,9 @@ public class ViewPictureActivity extends AppCompatActivity {
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
 
         txtDateTime = findViewById(R.id.txt_dateTime);
-        txtImgName = findViewById(R.id.txt_imgName);
-        txtImgMp = findViewById(R.id.txt_imgMP);
-        txtImgResolution = findViewById(R.id.txt_imgResolution);
+        txtImgName = findViewById(R.id.txt_vidName);
+        txtImgMp = findViewById(R.id.txt_vidMP);
+        txtImgResolution = findViewById(R.id.txt_vidResolution);
         txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
         txtFilePath = findViewById(R.id.txt_filePath);
 
@@ -351,10 +351,10 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         TextView txtImgName, txtDateTime, txtImgMP, txtImgResolution, txtOnDeviceSize, txtFilePath;
 
-        txtImgName = dialog.findViewById(R.id.txt_imgName);
+        txtImgName = dialog.findViewById(R.id.txt_vidName);
         txtDateTime = dialog.findViewById(R.id.txt_dateTime);
-        txtImgMP = dialog.findViewById(R.id.txt_imgMP);
-        txtImgResolution = dialog.findViewById(R.id.txt_imgResolution);
+        txtImgMP = dialog.findViewById(R.id.txt_vidMP);
+        txtImgResolution = dialog.findViewById(R.id.txt_vidResolution);
         txtOnDeviceSize = dialog.findViewById(R.id.txt_onDeviceSize);
         txtFilePath = dialog.findViewById(R.id.txt_filePath);
 
