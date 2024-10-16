@@ -1,8 +1,10 @@
 package com.example.galleryapp.main.Activity;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
@@ -29,6 +32,7 @@ import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class ViewPictureActivity extends AppCompatActivity {
@@ -43,6 +47,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     private ViewPager vpFullPhoto;
     private RelativeLayout mainLayout;
     private VPPhotoAdapter viewPagerPhotoAdapter;
+    private int currentPosition = 0; // hold current position ViewPager
     private ArrayList<String> imageList = new ArrayList<>();
     private boolean isWhiteBG = false;
 
@@ -71,7 +76,7 @@ public class ViewPictureActivity extends AppCompatActivity {
                 return true;
             }
         });
-// activity open time only show photo
+        // activity open time only show photo
         enterFullScreen();
 
         vpFullPhoto.setOnClickListener(view -> toggleVisibility());
@@ -250,6 +255,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                currentPosition = position;
                 if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 }
@@ -281,13 +287,30 @@ public class ViewPictureActivity extends AppCompatActivity {
             }
         });
 
-        imgShare.setOnClickListener(view -> {
-        });
+        imgShare.setOnClickListener(view -> shareFile());
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         txtImgDate.setText("set Karo");
 
 
     }
+
+    private void shareFile() {
+        String imagePath = imageList.get(currentPosition);
+        File file = new File(imagePath);
+        if (file.exists()) {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/*"); // Change to image/* for sharing images
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Share Image via"));
+            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
+        } else {
+            // If any error then...
+            Toast.makeText(this, "Image file not found", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void setBottomSheetBehavior() {
         bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottomSheet));

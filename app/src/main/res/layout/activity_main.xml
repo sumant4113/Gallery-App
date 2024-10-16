@@ -48,7 +48,7 @@
         android:id="@+id/txt_totalItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/nunito_sans_semibold"
+        android:fontFamily="monospace"
         android:text="Total item: 0"
         android:textColor="@color/black"
         android:textSize="16sp"

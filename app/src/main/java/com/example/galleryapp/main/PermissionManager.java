@@ -14,7 +14,6 @@ public class PermissionManager {
 
     public interface PermissionCallback {
         void onPermissionGranted();
-
         void onPermissionDenied();
     }
 
@@ -36,21 +35,48 @@ public class PermissionManager {
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                 };
             }
-            ActivityCompat.requestPermissions(activity, permissions, REQUEST_PERMISSIONS_CODE);
+
+            // Only request permissions if they aren't already granted
+            if (!hasAllPermissions(activity, permissions)) {
+                ActivityCompat.requestPermissions(activity, permissions, REQUEST_PERMISSIONS_CODE);
+            } else {
+                callback.onPermissionGranted();  // Permissions already granted
+            }
         } else {
-            // No runtime permissions required below Android 6.0 (API level 23)
-            callback.onPermissionGranted();
+            callback.onPermissionGranted();  // No runtime permissions needed
         }
     }
 
     public static void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                                   @NonNull int[] grantResults, PermissionCallback callback) {
         if (requestCode == REQUEST_PERMISSIONS_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
                 callback.onPermissionGranted();
             } else {
                 callback.onPermissionDenied();
             }
+
+            /*if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                callback.onPermissionGranted();
+            } else {
+                callback.onPermissionDenied();
+            }*/
         }
+    }
+    // Helper method to check if all required permissions are granted
+    public static boolean hasAllPermissions(Activity activity, String[] permissions) {
+        for (String permission : permissions) {
+            if (ActivityCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
     }
 }

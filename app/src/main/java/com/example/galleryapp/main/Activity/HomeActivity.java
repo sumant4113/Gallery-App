@@ -61,7 +61,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onPermissionGranted() {
                 Log.d(TAG, "Permission granted");
-                Toast.makeText(HomeActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeActivity.this, "Permission granted. Loading images...", Toast.LENGTH_SHORT).show();
                 // Call loadImages
                 if (mainFragment != null) {
                     mainFragment.loadImages();
@@ -71,7 +71,16 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onPermissionDenied() {
                 Log.d(TAG, "Permission denied");
-                Toast.makeText(HomeActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeActivity.this, "Permissions denied. You can enable them in settings.", Toast.LENGTH_LONG).show();
+/*                Intent openSetting = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION,
+                        Uri.fromParts("package", getPackageName(), null));
+                openSetting.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(openSetting);*/
+
+              /*  Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", getPackageName(), null));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);*/
             }
         });
     }
@@ -83,7 +92,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onPermissionGranted() {
                 Log.d(TAG, "Permission granted");
-                Toast.makeText(HomeActivity.this, "Permission granted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeActivity.this, "Permission granted. Loading images...", Toast.LENGTH_SHORT).show();
                 if (mainFragment != null) {
                     mainFragment.loadImages();
                 }
@@ -92,7 +101,12 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onPermissionDenied() {
                 Log.d(TAG, "Permission denied");
-                Toast.makeText(HomeActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeActivity.this, "Permissions denied. You can enable them in settings.", Toast.LENGTH_LONG).show();
+               /* Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", getPackageName(), null));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);*/
+
             }
         });
     }
@@ -100,8 +114,17 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mainFragment != null) {
-            mainFragment.loadImages();
+        // Check permissions again in case user enabled them in the settings
+        if (PermissionManager.hasAllPermissions(this, new String[]{
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                android.Manifest.permission.READ_MEDIA_IMAGES,
+                android.Manifest.permission.READ_MEDIA_VIDEO})) {
+            if (mainFragment != null) {
+                mainFragment.loadImages();  // Load images if permissions are granted
+            }
+        } else {
+            Toast.makeText(this, "Permissions are still missing. Please grant them.", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -19,13 +19,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPVideoAdapter;
 import com.example.galleryapp.main.Model.VideoModel;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
@@ -37,6 +40,11 @@ import java.util.ArrayList;
 public class ViewVideoActivity extends AppCompatActivity {
 
     private static final String TAG = "ViewVideoActivity";
+
+    // BottomSheetProperty
+    private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+    private LinearLayout llBottomSheet;
+
     private RelativeLayout mainLayoutVideo;
     private LinearLayout layoutTopVideo, layoutBottomVideo;
 
@@ -57,83 +65,11 @@ public class ViewVideoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_view_video);
 
         initView();
         showFileProperties(position);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
-
-        if (videoModelArrayList != null && !videoModelArrayList.isEmpty()) {
-            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
-            vpFullVideo.setAdapter(vpVideoAdapter);
-            vpFullVideo.setCurrentItem(position);
-
-            vpVideoAdapter.notifyDataSetChanged();
-
-            vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                    // Stop the current video when a new page is selected
-                    vpVideoAdapter.stopCurrentVideo();
-                    VideoView videoView = findViewById(R.id.video_view);
-                    if (videoView.isPlaying()) {
-                        videoView.stopPlayback();
-                    }
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-                    VideoView videoView = findViewById(R.id.video_view);
-                    if (videoView.isPlaying()) {
-                        videoView.stopPlayback();
-                        vpVideoAdapter.stopCurrentVideo();
-                    }
-                }
-            });
-        }
-
-        /*if (videoArrayList != null && !videoArrayList.isEmpty()) {
-            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoArrayList);
-            vpFullVideo.setAdapter(vpVideoAdapter);
-            vpFullVideo.setCurrentItem(position);
-
-            vpVideoAdapter.notifyDataSetChanged();
-
-            // Add a listener to detect page changes and stop the video when swiped
-            vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                }
-
-                @Override
-                public void onPageSelected(int position) {
-                    // Stop the current video when a new page is selected
-                    vpVideoAdapter.stopCurrentVideo();
-                    VideoView videoView = findViewById(R.id.video_view);
-                    if (videoView.isPlaying()) {
-                        videoView.stopPlayback();
-                    }
-
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-                    VideoView videoView = findViewById(R.id.video_view);
-                    if (videoView.isPlaying()) {
-                        videoView.stopPlayback();
-                        vpVideoAdapter.stopCurrentVideo();
-                    }
-                }
-            });
-        }*/
     }
 
     /*@Override
@@ -178,7 +114,11 @@ public class ViewVideoActivity extends AppCompatActivity {
         mainLayoutVideo = findViewById(R.id.main_layout_video);
         layoutTopVideo = findViewById(R.id.layout_top_video);
         layoutBottomVideo = findViewById(R.id.layout_bottom_video);
-// Bottom Sheet
+
+        // Initialize BottomSheet
+        llBottomSheet = findViewById(R.id.ll_bottomSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
+
         txtVidName = findViewById(R.id.txt_vidName);
         txtVidMp = findViewById(R.id.txt_vidMP);
         txtVidResolution = findViewById(R.id.txt_vidResolution);
@@ -192,6 +132,59 @@ public class ViewVideoActivity extends AppCompatActivity {
             position = intent.getIntExtra("position", -1);
         }
 
+        if (videoModelArrayList != null && !videoModelArrayList.isEmpty()) {
+            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
+            vpFullVideo.setAdapter(vpVideoAdapter);
+            vpFullVideo.setCurrentItem(position);
+
+            vpVideoAdapter.notifyDataSetChanged();
+
+            vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    }
+                    if (isWhiteBG) {
+                        mainLayoutVideo.setBackgroundColor(Color.BLACK);
+                    }
+                    // Stop the current video when a new page is selected
+                    vpVideoAdapter.stopCurrentVideo();
+                    VideoView videoView = findViewById(R.id.video_view);
+                    if (videoView.isPlaying()) {
+                        videoView.stopPlayback();
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    }
+                    VideoView videoView = findViewById(R.id.video_view);
+                    if (videoView.isPlaying()) {
+                        videoView.stopPlayback();
+                        vpVideoAdapter.stopCurrentVideo();
+                    }
+                }
+            });
+        }
+
+        setBottomSheetBehavior();
+        imgMore.setOnClickListener(v -> {
+//            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
+            if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                // Expand the bottom sheet
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            } else {
+                // Collapse the bottom sheet
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);  // Or use STATE_COLLAPSED
+            }
+        });
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         imgShare.setOnClickListener(v -> {
             shareFile(position);
@@ -203,51 +196,24 @@ public class ViewVideoActivity extends AppCompatActivity {
             renameFIle(position, v);
         });
 
-       /* if (getIntent() != null) {
-            videoArrayList = getIntent().getStringArrayListExtra("video_path");
-            position = getIntent().getIntExtra("position", -1);
-
-            String path = videoArrayList.get(position);
-
-        }*/
-        /*// Add page change listener to ViewPager
-        vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                // When page changes, ensure video in the previous page is stopped
-                View currentView = vpFullVideo.findViewWithTag("videoView" + position);
-                if (currentView != null) {
-                    VideoView videoView = currentView.findViewById(R.id.video_view);
-                    if (videoView.isPlaying()) {
-                        videoView.stopPlayback();
-//                        ViewVideoActivity.imgPlayVideoBtn.setVisibility(View.VISIBLE); // Show play button again
-                    }
-                }
-            }
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
-        if (videoList != null && !videoList.isEmpty()) {
-            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoList);
-            vpFullVideo.setAdapter(vpVideoAdapter);
-            vpFullVideo.setCurrentItem(position);
-            vpVideoAdapter.notifyDataSetChanged();
-        }*/
-
     }
 
-    protected void shareFile(int position) {
-        Uri uri = Uri.parse(videoModelArrayList.get(position).getPath());
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("video/*");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(intent, "share"));
-        Toast.makeText(this, "loading...", Toast.LENGTH_SHORT).show();
+    private void shareFile(int position) {
+        String videoPath = videoModelArrayList.get(position).getPath();
+        File file = new File(videoPath);
+        if (file.exists()) {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("video/*");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Share video via"));
+            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
+        } else {
+            // If any Error then...
+            Toast.makeText(this, "Video file not found", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void deleteFile(int position, View view) {
@@ -275,6 +241,7 @@ public class ViewVideoActivity extends AppCompatActivity {
 
     private void renameFIle(int position, View view) {
         final Dialog dialog = new Dialog(this);
+
         dialog.setContentView(R.layout.rename_layout);
         final EditText etRenameFile = dialog.findViewById(R.id.et_renameFile);
         Button btnRenameFile = dialog.findViewById(R.id.btn_renameFile);
@@ -317,8 +284,6 @@ public class ViewVideoActivity extends AppCompatActivity {
     }
 
     private void showFileProperties(int position) {
-//        private TextView txtDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
-
         String vidName = videoModelArrayList.get(position).getTitle();
         String vidId = videoModelArrayList.get(position).getId();
         String vidDisplayName = videoModelArrayList.get(position).getDisplayName();
@@ -385,12 +350,10 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtImgTime.setText(formattedTime);
         txtDateTime.setText(formattedDateTime);
 
-//        txtOnDeviceSize.setText("On Device (" + humanCanRead + ")");
         txtVidName.setText(vidDisplayName);
         txtVidMp.setText(vidMp);
         txtVidResolution.setText(vidResolution);
         txtFilePath.setText(vidPath);
-
 
 //        Toast.makeText(this, "File Name : " + vidName + "Id : " + vidId + "Display Name : " + vidDisplayName + "Path : " + vidPath, Toast.LENGTH_SHORT).show();
         Log.d(TAG, "showFileProperties: +-+-name" + vidName);
@@ -406,17 +369,51 @@ public class ViewVideoActivity extends AppCompatActivity {
 
     }
 
+    // SetUp Bottom Sheet Behavior
+    private void setBottomSheetBehavior() {
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottomSheet));
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        Log.d("BottomSheet", "STATE_EXPANDED");
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        Log.d("BottomSheet", "STATE_COLLAPSED");
+                        break;
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                        Log.d("BottomSheet", "STATE_HIDDEN");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Handle slide behavior if needed
+            }
+        });
+
+        // Initially hide the bottom sheet
+        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+    }
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         VideoView videoView = findViewById(R.id.video_view);
-        if (videoView.isPlaying()) {
-            videoView.stopPlayback();
-            finish();
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         } else {
+            if (videoView.isPlaying()) {
+                videoView.stopPlayback();
+//                finish();
+            }
             finish();
         }
-        finish();
     }
 
     @Override
