@@ -68,7 +68,6 @@ public class VideoRvAdapter extends RecyclerView.Adapter<VideoRvAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView videoThumbnail;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             videoThumbnail = itemView.findViewById(R.id.img_video_item); // Assume your item layout has this ImageView

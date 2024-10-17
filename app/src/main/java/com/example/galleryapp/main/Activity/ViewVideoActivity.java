@@ -146,6 +146,7 @@ public class ViewVideoActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
+
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
@@ -185,16 +186,11 @@ public class ViewVideoActivity extends AppCompatActivity {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);  // Or use STATE_COLLAPSED
             }
         });
+
         imgBackBtn.setOnClickListener(v -> onBackPressed());
-        imgShare.setOnClickListener(v -> {
-            shareFile(position);
-        });
-        imgDelete.setOnClickListener(v -> {
-            deleteFile(position, v);
-        });
-        imgEdit.setOnClickListener(v -> {
-            renameFIle(position, v);
-        });
+        imgShare.setOnClickListener(v -> shareFile(position));
+        imgDelete.setOnClickListener(v -> deleteFile(position, v));
+        imgEdit.setOnClickListener(v -> renameFIle(position, v));
 
     }
 
@@ -351,21 +347,21 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtDateTime.setText(formattedDateTime);
 
         txtVidName.setText(vidDisplayName);
-        txtVidMp.setText(vidMp);
+        txtVidMp.setText(duration);
         txtVidResolution.setText(vidResolution);
         txtFilePath.setText(vidPath);
 
 //        Toast.makeText(this, "File Name : " + vidName + "Id : " + vidId + "Display Name : " + vidDisplayName + "Path : " + vidPath, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "showFileProperties: +-+-name" + vidName);
-        Log.d(TAG, "showFileProperties: +-+-id" + vidId);
-        Log.d(TAG, "showFileProperties: +-+-DisName" + vidDisplayName);
-        Log.d(TAG, "showFileProperties: +-+-path" + vidPath);
-        Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);
-        Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);
-        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);
-        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead);
-        Log.d(TAG, "showFileProperties: +-+-duration" + duration);
-        Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);
+        Log.d(TAG, "showFileProperties: +-+-name" + vidName);            // Only Name
+        Log.d(TAG, "showFileProperties: +-+-id" + vidId);               // Id
+        Log.d(TAG, "showFileProperties: +-+-DisName" + vidDisplayName); // Name With extension MP3 Mp4
+        Log.d(TAG, "showFileProperties: +-+-path" + vidPath);       // Full path
+        Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);        // Image Size number
+        Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);  // Give Resolution (Width x Height)
+        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
+        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
+        Log.d(TAG, "showFileProperties: +-+-duration" + duration); // Duration Time
+        Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);     // not need
 
     }
 
@@ -401,6 +397,7 @@ public class ViewVideoActivity extends AppCompatActivity {
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

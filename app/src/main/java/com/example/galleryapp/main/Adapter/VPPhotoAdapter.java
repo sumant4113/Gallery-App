@@ -15,17 +15,19 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.Target;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ViewPictureActivity;
+import com.example.galleryapp.main.Model.ImageModel;
 import com.ortiz.touchview.TouchImageView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class VPPhotoAdapter extends PagerAdapter {
 
     private final Context context;
     private static final String TAG = "VPPhotoAdapter";
-    private ArrayList<String> imageList;
+    private ArrayList<ImageModel> imageList;
 
-    public VPPhotoAdapter(Context context, ArrayList<String> imageList) {
+    public VPPhotoAdapter(Context context, ArrayList<ImageModel> imageList) {
         this.context = context;
         this.imageList = imageList;
     }
@@ -43,34 +45,34 @@ public class VPPhotoAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        String imgPath = imageList.get(position);
-//        File image_file = new File(imageList.get(position));
+        ImageModel imageModel = imageList.get(position);
 
         View view = LayoutInflater.from(context).inflate(R.layout.item_image_slider, container, false);
         TouchImageView imgFullPhoto = view.findViewById(R.id.img_fullPhoto);
 
 //        image_File = getIntent().getStringExtra("image_file");
-//        File file = new File(String.valueOf(image_file));
-//        if (file.exists()) {
-//            Glide.with(context).load(image_file).into(imgFullPhoto);
-//        }
-
+        File file = new File(String.valueOf(imageList));
+      /*  if (file.exists()) {
+            Glide.with(context).load(imageModel).into(imgFullPhoto);
+        }*/
         try {
-            Glide.with(context).load(imgPath)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .override(Target.SIZE_ORIGINAL)
-                    .into(imgFullPhoto);
+
+            if (file.exists()) {
+                Glide.with(context).load(imageModel)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(Target.SIZE_ORIGINAL)
+                        .into(imgFullPhoto);
+            }
+
         } catch (Exception e) {
             Toast.makeText(context, "Glide Fail" + e.getMessage(), Toast.LENGTH_SHORT).show();
             Log.d(TAG, "instantiateItem: Glide Fail" + e.getMessage());
         }
 
-
         imgFullPhoto.setOnClickListener(view1 -> {
             // Call toggleVisibility in ViewPictureActivity
             if (context instanceof ViewPictureActivity) {
                 ((ViewPictureActivity) context).toggleVisibility();
-
 /*            Intent intent = new Intent(context, ViewPictureActivity.class);
                 intent.putExtra("image_file", image_file);
                 context.startActivity(intent);*/

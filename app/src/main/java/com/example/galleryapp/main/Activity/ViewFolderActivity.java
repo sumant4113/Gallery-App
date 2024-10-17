@@ -54,6 +54,7 @@ public class ViewFolderActivity extends AppCompatActivity {
 
     private void loadVideos() {
         videoInFolder = getAllVideoFromFolder(this, folderName);
+
         if (folderName != null && !videoInFolder.isEmpty()) {
             fVideosRvAdapter = new FVideosRvAdapter(this, videoInFolder);
 

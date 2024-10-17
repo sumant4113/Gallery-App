@@ -30,6 +30,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
+import com.example.galleryapp.main.Model.ImageModel;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.io.File;
@@ -47,9 +48,11 @@ public class ViewPictureActivity extends AppCompatActivity {
     private ViewPager vpFullPhoto;
     private RelativeLayout mainLayout;
     private VPPhotoAdapter viewPagerPhotoAdapter;
+
     private int currentPosition = 0; // hold current position ViewPager
-    private ArrayList<String> imageList = new ArrayList<>();
     private boolean isWhiteBG = false;
+
+    private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
     private TextView txtImgDate, txtImgTime, txtDateTime, txtImgName, txtImgMp, txtImgResolution, txtOnDeviceSize, txtFilePath;
@@ -101,8 +104,20 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
         }
     }
-
     public void toggleVisibility() {
+        int visibility = (layoutTop.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+        layoutTop.setVisibility(visibility);
+        layoutBottom.setVisibility(visibility);
+        mainLayout.setBackgroundColor(visibility == View.VISIBLE ? Color.WHITE : Color.BLACK);
+
+        if (visibility == View.VISIBLE) {
+            exitFullScreen();
+        } else {
+            enterFullScreen();
+        }
+    }
+
+    /*public void toggleVisibility() {
         if (layoutTop.getVisibility() == View.VISIBLE) {
             layoutTop.setVisibility(View.GONE);
             layoutBottom.setVisibility(View.GONE);
@@ -114,7 +129,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             mainLayout.setBackgroundColor(Color.WHITE);
             exitFullScreen();
         }
-    }
+    }*/
 
     /* public void toggleVisibility() {
      *//*if (isWhiteBG) {
@@ -232,48 +247,60 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         txtImgName.setText("");
 
-
-        if (getIntent().getExtras() != null) {
-            // Get Data from Intent
-            imageList = getIntent().getStringArrayListExtra("image_path");
+        if (getIntent().hasExtra("image_path") && getIntent().getParcelableArrayListExtra("image_path") != null) {
+            imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
             position = getIntent().getIntExtra("position", 0);
+        } else {
+            // Handle the case where there is no data passed
+            Toast.makeText(this, "No image data found", Toast.LENGTH_SHORT).show();
+            finish(); // Exit activity if no data is found
         }
 
-        if (imageList != null && !imageList.isEmpty()) {
-            viewPagerPhotoAdapter = new VPPhotoAdapter(this, imageList);
-            vpFullPhoto.setAdapter(viewPagerPhotoAdapter);
+     /*   if (getIntent().getExtras() != null) {
+            // Get Data from Intent
+            imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
+            position = getIntent().getIntExtra("position", 0);
+        }*/
+
+        if (imageModelArrayList != null && !imageModelArrayList.isEmpty()) {
+
+            if (viewPagerPhotoAdapter == null) {
+                viewPagerPhotoAdapter = new VPPhotoAdapter(this, imageModelArrayList);
+                vpFullPhoto.setAdapter(viewPagerPhotoAdapter);
+            }
             vpFullPhoto.setCurrentItem(position);
-        } else {// if null then ...
-            Toast.makeText(this, "Fail", Toast.LENGTH_SHORT).show();
+
+            viewPagerPhotoAdapter.notifyDataSetChanged();
+
+            vpFullPhoto.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    currentPosition = position;
+                    showImageProperties(position);
+
+                    if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    }
+                    if (isWhiteBG) {
+                        mainLayout.setBackgroundColor(Color.BLACK);
+                    }
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+                    if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    }
+                }
+            });
         }
-
-        vpFullPhoto.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                currentPosition = position;
-                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-                if (isWhiteBG) {
-                    mainLayout.setBackgroundColor(Color.BLACK);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-                }
-            }
-        });
 
         setBottomSheetBehavior();
-
         imgMore.setOnClickListener(v -> {
 
 //            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
@@ -287,30 +314,81 @@ public class ViewPictureActivity extends AppCompatActivity {
             }
         });
 
-        imgShare.setOnClickListener(view -> shareFile());
+        imgShare.setOnClickListener(v -> shareFile());
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         txtImgDate.setText("set Karo");
 
 
     }
 
+
     private void shareFile() {
-        String imagePath = imageList.get(currentPosition);
+        String imagePath = imageModelArrayList.get(currentPosition).getPath();
         File file = new File(imagePath);
         if (file.exists()) {
+            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
             Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".provider", file);
             Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("image/*"); // Change to image/* for sharing images
+            intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(Intent.createChooser(intent, "Share Image via"));
-            Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
         } else {
-            // If any error then...
             Toast.makeText(this, "Image file not found", Toast.LENGTH_SHORT).show();
         }
     }
 
+    // Delete Images
+    /*private void deleteFile(int position, View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete File")
+                .setMessage(videoModelArrayList.get(position).getTitle())
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                })
+                .setPositiveButton("OK", (dialog, which) -> {
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                            Long.parseLong(videoModelArrayList.get(position).getId()));
+                    File file = new File(videoModelArrayList.get(position).getPath());
+                    boolean deleted = file.delete();
+                    if (deleted) {
+                        getApplicationContext().getContentResolver().delete(contentUri, null, null);
+                        videoModelArrayList.remove(position);
+                        vpVideoAdapter.notifyDataSetChanged();
+                        Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
+                    } else {
+                        Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
+                    }
+                }).show();
+    }*/
+
+    private void showImageProperties(int position) {
+        String imgId = imageModelArrayList.get(position).getId();
+        String imgPath = imageModelArrayList.get(position).getPath();
+        String imgName = imageModelArrayList.get(position).getTitle();
+        String imgSize = imageModelArrayList.get(position).getSize();
+        String imgResolution = imageModelArrayList.get(position).getResolution();
+        String imgDateTaken = imageModelArrayList.get(position).getDateTaken();
+
+        txtDateTime = findViewById(R.id.txt_dateTime);
+        txtImgMp = findViewById(R.id.txt_vidMP);
+        txtImgResolution = findViewById(R.id.txt_vidResolution);
+        txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
+        txtFilePath = findViewById(R.id.txt_filePath);
+
+        txtDateTime.setText(imgDateTaken);
+        txtImgDate.setText("");
+        txtImgTime.setText("");
+
+        txtFilePath.setText(imgPath);
+        txtOnDeviceSize.setText(imgSize);
+        txtImgMp.setText(imgSize);
+        txtImgResolution.setText(imgResolution);
+        txtImgName.setText(imgName);
+
+
+        Log.d(TAG, "showImageProperties: +-+-" + imgDateTaken);
+    }
 
     private void setBottomSheetBehavior() {
         bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottomSheet));
@@ -343,29 +421,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
-
-/*    private void setBottomSheetBehavior() {
-        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-
-                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-
-                } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
-
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            }
-        });
-        bottomSheetBehavior.setHideable(true);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-    }
-*/
-
 
     private void showBottomDialog() {
         final Dialog dialog = new Dialog(this);
