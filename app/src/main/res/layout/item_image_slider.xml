@@ -10,8 +10,7 @@
         android:id="@+id/img_fullPhoto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
-        android:src="@drawable/img_semple" />
+        android:scaleType="fitCenter" />
 
     <!--        <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/img_fullPhoto"

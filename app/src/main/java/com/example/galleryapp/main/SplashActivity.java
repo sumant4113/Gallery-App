@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.HomeActivity;
+import com.example.galleryapp.main.Fragment.MainFragment;
 
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
@@ -18,6 +19,11 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        MainFragment mainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.viewPager);
+
+        if (mainFragment != null) {
+            mainFragment.loadImages();
+        }
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -25,7 +31,7 @@ public class SplashActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }
-        }, 10);
+        }, 1000);
 
     }
 }
