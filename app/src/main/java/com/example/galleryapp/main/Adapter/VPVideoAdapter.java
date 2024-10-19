@@ -54,11 +54,12 @@ public class VPVideoAdapter extends PagerAdapter {
         View view = LayoutInflater.from(context).inflate(R.layout.item_video_slider, container, false);
 
         VideoView videoView = view.findViewById(R.id.video_view);
+
         MediaController mediaController = new MediaController(context);
         mediaController.setAnchorView(videoView);
         videoView.setMediaController(mediaController);
+        videoView.requestFocus();
 
-//        videoView.setVideoURI(Uri.parse(vidPath));
         videoView.setVideoURI(Uri.parse(videoModel.getPath()));
 
         videoView.setOnClickListener(view1 -> {

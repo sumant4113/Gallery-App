@@ -20,6 +20,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         MainFragment mainFragment = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.viewPager);
+        Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
 
         if (mainFragment != null) {
             mainFragment.loadImages();
@@ -27,7 +28,6 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
                 startActivity(intent);
                 finish();
             }

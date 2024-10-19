@@ -1,9 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.GalleryApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!--        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>-->
-        <!-- Customize your light theme here. -->
-
         <!--Primary color here-->
         <item name="colorPrimary">@color/black</item>
         <item name="colorPrimaryVariant">@color/black</item>
@@ -33,7 +30,7 @@
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
         <item name="android:windowAnimationStyle">@style/BottomSheetDialogAnimation</item>
     </style>
-    
+
     <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
         <item name="behavior_peekHeight">512dp</item>

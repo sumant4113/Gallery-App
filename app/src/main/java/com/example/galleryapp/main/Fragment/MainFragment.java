@@ -91,6 +91,7 @@ public class MainFragment extends Fragment {
                 String dateTaken = cursor.getString(4);
 
                 String humanReadableSize = convertSizeToReadable(size);
+
                 ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, "", dateTaken);
                 imageModelList.add(imageModel);
             }

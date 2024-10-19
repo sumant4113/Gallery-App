@@ -1,7 +1,6 @@
 package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,23 +50,22 @@ public class VPPhotoAdapter extends PagerAdapter {
         TouchImageView imgFullPhoto = view.findViewById(R.id.img_fullPhoto);
 
 //        image_File = getIntent().getStringExtra("image_file");
-        File file = new File(String.valueOf(imageList));
+//        File file = new File(String.valueOf(imageList));
       /*  if (file.exists()) {
             Glide.with(context).load(imageModel).into(imgFullPhoto);
         }*/
-        try {
 
-            if (file.exists()) {
-                Glide.with(context).load(imageModel)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .override(Target.SIZE_ORIGINAL)
-                        .into(imgFullPhoto);
-            }
-
-        } catch (Exception e) {
-            Toast.makeText(context, "Glide Fail" + e.getMessage(), Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "instantiateItem: Glide Fail" + e.getMessage());
+        File file = new File(imageModel.getPath());  // Get the correct image path
+        if (file.exists()) {
+            Glide.with(context)
+                    .load(file)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .override(Target.SIZE_ORIGINAL)
+                    .into(imgFullPhoto);
+        } else {
+            Toast.makeText(context, "File does not exist", Toast.LENGTH_SHORT).show();
         }
+
 
         imgFullPhoto.setOnClickListener(view1 -> {
             // Call toggleVisibility in ViewPictureActivity

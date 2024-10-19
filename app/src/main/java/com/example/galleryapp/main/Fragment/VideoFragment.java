@@ -21,9 +21,10 @@ import java.util.ArrayList;
 
 public class VideoFragment extends Fragment {
 
-    private RecyclerView rvVideos;
     private static final String TAG = "VideoFragment";
     private View view;
+
+    private RecyclerView rvVideos;
     private VideoRvAdapter videoRvAdapter;
     private final ArrayList<VideoModel> videosList = new ArrayList<>();
 
