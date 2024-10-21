@@ -14,10 +14,13 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
+import com.example.galleryapp.main.Activity.ImageManager;
 import com.example.galleryapp.main.Adapter.GalleryRvAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainFragment extends Fragment {
 
@@ -26,6 +29,7 @@ public class MainFragment extends Fragment {
     private View view;
     private GalleryRvAdapter galleryRvAdapter;
     private Context context;
+    private ImageManager imageManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +59,25 @@ public class MainFragment extends Fragment {
 
         rvGallery.setLayoutManager(layoutManager);
         rvGallery.setAdapter(galleryRvAdapter);
+
+
+
+        ExecutorService service = Executors.newSingleThreadExecutor();
+
+        service.execute(new Runnable() {
+            @Override
+            public void run() {
+                loadImages();
+            }
+        });
+
+        requireActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+
     }
     public void loadImages() {
         new Thread(() -> {
