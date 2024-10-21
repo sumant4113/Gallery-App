@@ -33,8 +33,7 @@
         <activity
             android:name=".main.Activity.ViewPictureActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:exported="false"
-            android:theme="@style/TranslucentTheme" />
+            android:exported="false" />
         <activity
             android:name=".main.Activity.HomeActivity"
             android:exported="false" />
