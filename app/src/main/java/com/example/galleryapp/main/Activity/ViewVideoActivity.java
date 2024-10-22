@@ -414,6 +414,18 @@ public class ViewVideoActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        releaseMediaPlayer();
+    }
+
+    private void releaseMediaPlayer() {
+        VideoView videoView = findViewById(R.id.video_view);
+        if (videoView != null) {
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         // Ensure the video stops when the activity is stopped

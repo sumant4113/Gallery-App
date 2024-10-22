@@ -30,7 +30,7 @@ public class MainFragment extends Fragment {
     private GalleryRvAdapter galleryRvAdapter;
     private Context context;
     private ImageManager imageManager;
-
+    private ExecutorService service;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +48,7 @@ public class MainFragment extends Fragment {
     private void initView() {
         rvGallery = view.findViewById(R.id.rv_gallery);
         galleryRvAdapter = new GalleryRvAdapter(getContext(), imagesList);
+        service = Executors.newSingleThreadExecutor();
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         // solve recycle view lag
@@ -59,10 +60,6 @@ public class MainFragment extends Fragment {
 
         rvGallery.setLayoutManager(layoutManager);
         rvGallery.setAdapter(galleryRvAdapter);
-
-
-
-        ExecutorService service = Executors.newSingleThreadExecutor();
 
         service.execute(new Runnable() {
             @Override
@@ -79,6 +76,7 @@ public class MainFragment extends Fragment {
         });
 
     }
+
     public void loadImages() {
         new Thread(() -> {
             ArrayList<ImageModel> loadedImages = loadImagesFromStorage();

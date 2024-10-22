@@ -20,13 +20,12 @@
 
     <style name="SplashScreen" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/white</item>
-        <item name="android:windowBackground">@drawable/brand_google_photos</item>
+        <!--        <item name="android:windowBackground">@drawable/brand_google_photos</item>-->
         <item name="android:navigationBarColor">@color/light_black</item>
-        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@color/light_grey
-        </item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">@color/light_grey</item>
     </style>
 
-    <style name="FullScreenTheme"  parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="FullScreenTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
