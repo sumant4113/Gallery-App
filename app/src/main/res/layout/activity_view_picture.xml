@@ -52,7 +52,7 @@
                     android:id="@+id/txt_img_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="February 5,2024"
+                    android:text="Month Date, Year"
                     android:textColor="@color/black"
                     android:textSize="20sp" />
 
@@ -60,7 +60,7 @@
                     android:id="@+id/txt_img_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="12:08"
+                    android:text="Hours"
                     android:textColor="@color/grey"
                     android:textSize="18sp" />
             </LinearLayout>
@@ -133,7 +133,7 @@
 
     <!--    Bottom Sheet Layout-->
     <LinearLayout
-        android:id="@+id/ll_bottomSheet"
+        android:id="@+id/ll_img_bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/dailog_pop_up"
@@ -151,13 +151,13 @@
             android:src="@drawable/round_remove" />
 
         <TextView
-            android:id="@+id/txt_dateTime"
+            android:id="@+id/txt_img_dateTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:padding="15sp"
             android:paddingHorizontal="25sp"
-            android:text="Mon, 23  Oct 2023 • 12:13"
+            android:text="Mon, 23 Oct 2023 • 12:13"
             android:textColor="@color/black"
             android:textSize="18sp" />
 
@@ -191,24 +191,24 @@
                 android:paddingHorizontal="20sp">
 
                 <TextView
-                    android:id="@+id/txt_vidName"
+                    android:id="@+id/txt_imgName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Screenshot_20232120-1213211_video Download.jpg"
+                    android:text="Screenshot_20232120-1213211_image Download.jpg"
                     android:textColor="@color/black"
                     android:textSize="15sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/txt_vidMP"
+                    android:id="@+id/txt_imgMP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="1.2MP"
-                    app:layout_constraintStart_toStartOf="@id/txt_vidName"
-                    app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
+                    android:text="0.0MP"
+                    app:layout_constraintStart_toStartOf="@id/txt_imgName"
+                    app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
 
                 <TextView
                     android:id="@+id/txt_bollet"
@@ -217,18 +217,18 @@
                     android:layout_marginStart="7dp"
                     android:layout_marginTop="2dp"
                     android:text="•"
-                    app:layout_constraintStart_toEndOf="@id/txt_vidMP"
-                    app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
+                    app:layout_constraintStart_toEndOf="@id/txt_imgMP"
+                    app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
 
                 <TextView
-                    android:id="@+id/txt_vidResolution"
+                    android:id="@+id/txt_imgResolution"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="7dp"
                     android:layout_marginTop="2dp"
-                    android:text="720 x 1600"
+                    android:text="000 x 0000"
                     app:layout_constraintStart_toEndOf="@id/txt_bollet"
-                    app:layout_constraintTop_toBottomOf="@id/txt_vidName" />
+                    app:layout_constraintTop_toBottomOf="@id/txt_imgName" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -255,24 +255,24 @@
                 android:paddingHorizontal="20sp">
 
                 <TextView
-                    android:id="@+id/txt_onDeviceSize"
+                    android:id="@+id/txt_img_onDeviceSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="start"
-                    android:text="On Device (135 kB)"
+                    android:text="On Device (000 kB)"
                     android:textColor="@color/black"
                     android:textSize="15sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/txt_filePath"
+                    android:id="@+id/txt_img_filePath"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="/storage/emulated/0/WhatsApp/Media/WhatsApp Documents"
-                    app:layout_constraintStart_toStartOf="@id/txt_filePath"
-                    app:layout_constraintTop_toBottomOf="@id/txt_onDeviceSize" />
+                    android:text="/---------/++++++++++/0/000000/+--+--+/00000000 00000000"
+                    app:layout_constraintStart_toStartOf="@id/txt_img_filePath"
+                    app:layout_constraintTop_toBottomOf="@id/txt_img_onDeviceSize" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

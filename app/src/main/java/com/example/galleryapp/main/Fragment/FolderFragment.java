@@ -29,15 +29,15 @@ import java.util.List;
 public class FolderFragment extends Fragment {
 
     private static final String TAG = "FolderFragment";
-    private ArrayList<VideoModel> videoModelList = new ArrayList<>();
-    private ArrayList<String> folderList = new ArrayList<>();
-    private FolderRvAdapter folderRvAdapter;
+
     private RecyclerView rvFolder;
+    private FolderRvAdapter folderRvAdapter;
+    private ArrayList<String> folderList = new ArrayList<>();
+    private ArrayList<VideoModel> videoModelList = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         videoModelList = fetchAllVideos(requireContext());
     }
 
@@ -54,10 +54,9 @@ public class FolderFragment extends Fragment {
     private void initView() {
         videoModelList = fetchAllVideos(requireContext());
 
-        if (folderList != null && !folderList.isEmpty() && videoModelList != null) {
+        if ((folderList != null) && !folderList.isEmpty() && (videoModelList != null)) {
             if (folderRvAdapter == null) {
                 folderRvAdapter = new FolderRvAdapter(getContext(), folderList, videoModelList);
-                rvFolder.setAdapter(folderRvAdapter);
 
                 // solve recycle view lag
                 rvFolder.setHasFixedSize(true);
@@ -68,6 +67,7 @@ public class FolderFragment extends Fragment {
 //            folderAdapter.notifyDataSetChanged();
 
                 rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false));
+                rvFolder.setAdapter(folderRvAdapter);
             } else {
                 folderRvAdapter.updateVideoList(videoModelList);
             }

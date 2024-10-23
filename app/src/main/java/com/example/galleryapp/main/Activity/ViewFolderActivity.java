@@ -46,6 +46,8 @@ public class ViewFolderActivity extends AppCompatActivity {
             folderPath = getIntent().getStringExtra("folderPath");
             folderName = getIntent().getStringExtra("folderName");
         }
+
+
         txtFolderName.setText(folderName);
 
         loadVideos();

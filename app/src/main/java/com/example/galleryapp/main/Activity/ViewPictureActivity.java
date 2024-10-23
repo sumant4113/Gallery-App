@@ -33,6 +33,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class ViewPictureActivity extends AppCompatActivity {
@@ -54,7 +57,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate, txtImgTime, txtDateTime, txtImgName, txtImgMp, txtImgResolution, txtOnDeviceSize, txtFilePath;
+    private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
     private GestureDetector gestureDetector;
 
@@ -103,6 +106,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
         }
     }
+
     public void toggleVisibility() {
         int visibility = (layoutTop.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
         layoutTop.setVisibility(visibility);
@@ -115,7 +119,6 @@ public class ViewPictureActivity extends AppCompatActivity {
             enterFullScreen();
         }
     }
-
 
 
     private void exitFullScreen() {
@@ -147,17 +150,15 @@ public class ViewPictureActivity extends AppCompatActivity {
         mainLayout = findViewById(R.id.main_layout);
 
         // Initialize BottomSheet
-        llBottomSheet = findViewById(R.id.ll_bottomSheet);
+        llBottomSheet = findViewById(R.id.ll_img_bottomSheet);
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
 
-        txtDateTime = findViewById(R.id.txt_dateTime);
-        txtImgName = findViewById(R.id.txt_vidName);
-        txtImgMp = findViewById(R.id.txt_vidMP);
-        txtImgResolution = findViewById(R.id.txt_vidResolution);
-        txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
-        txtFilePath = findViewById(R.id.txt_filePath);
-
-        txtImgName.setText("");
+        txtImgDateTime = findViewById(R.id.txt_img_dateTime);
+        txtImgName = findViewById(R.id.txt_imgName);
+        txtImgMp = findViewById(R.id.txt_imgMP);
+        txtImgResolution = findViewById(R.id.txt_imgResolution);
+        txtImgOnDeviceSize = findViewById(R.id.txt_img_onDeviceSize);
+        txtImgFilePath = findViewById(R.id.txt_img_filePath);
 
         if (getIntent().hasExtra("image_path") && getIntent().getParcelableArrayListExtra("image_path") != null) {
             imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
@@ -228,7 +229,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         imgShare.setOnClickListener(v -> shareFile());
         imgBackBtn.setOnClickListener(v -> onBackPressed());
-        txtImgDate.setText("set Karo");
+        imgDelete.setOnClickListener(v -> deleteFile(currentPosition, v));
 
 
     }
@@ -251,22 +252,43 @@ public class ViewPictureActivity extends AppCompatActivity {
     }
 
     // Delete Images
-    private void deleteFile(int position, View view) {
+    private void deleteFile(int currentPosition, View view) {
+        // Make AlertDialog for delete that file
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete File")
-                .setMessage(imageModelArrayList.get(position).getTitle())
+        builder.setTitle("Delete this Item?")
+                .setMessage(imageModelArrayList.get(currentPosition).getTitle())
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .setPositiveButton("OK", (dialog, which) -> {
-                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            Long.parseLong(imageModelArrayList.get(position).getId()));
-                    File file = new File(imageModelArrayList.get(position).getPath());
+                    Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            Long.parseLong(imageModelArrayList.get(currentPosition).getId()));
+                    File file = new File(imageModelArrayList.get(currentPosition).getPath());
+
                     boolean deleted = file.delete();
-                    if (deleted) {
+
+                    if (deleted && file.exists()) {
                         getApplicationContext().getContentResolver().delete(contentUri, null, null);
-                        imageModelArrayList.remove(position);
+                        imageModelArrayList.remove(currentPosition);
+
+                        if (imageModelArrayList.isEmpty()) {
+                            Toast.makeText(this, "No images more!", Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
                         viewPagerPhotoAdapter.notifyDataSetChanged();
+
+                        if (imageModelArrayList.size() > 0) {
+                            int newPos;
+                            if (currentPosition == imageModelArrayList.size()) { // if  last image then show previous one
+                                newPos = imageModelArrayList.size() - 1;
+                            } else {
+                                newPos = currentPosition; // Show the next image
+                            }
+                            vpFullPhoto.setCurrentItem(currentPosition, false);
+                        } else {
+                        }
+
                         Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                     } else {
                         Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
@@ -274,26 +296,33 @@ public class ViewPictureActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void showImageProperties(int position) {
-        String imgId = imageModelArrayList.get(position).getId();
-        String imgPath = imageModelArrayList.get(position).getPath();
-        String imgName = imageModelArrayList.get(position).getTitle();
-        String imgSize = imageModelArrayList.get(position).getSize();
-        String imgResolution = imageModelArrayList.get(position).getResolution();
-        String imgDateTaken = imageModelArrayList.get(position).getDateTaken();
+    private void showImageProperties(int currentPosition) {
+        String imgId = imageModelArrayList.get(currentPosition).getId();
+        String imgPath = imageModelArrayList.get(currentPosition).getPath();
+        String imgName = imageModelArrayList.get(currentPosition).getTitle();
+        String imgSize = imageModelArrayList.get(currentPosition).getSize();
+        String imgResolution = imageModelArrayList.get(currentPosition).getResolution();
+        String imgDateTaken = imageModelArrayList.get(currentPosition).getDateTaken();
 
-        txtDateTime = findViewById(R.id.txt_dateTime);
-        txtImgMp = findViewById(R.id.txt_vidMP);
-        txtImgResolution = findViewById(R.id.txt_vidResolution);
-        txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
-        txtFilePath = findViewById(R.id.txt_filePath);
 
-        txtDateTime.setText(imgDateTaken);
-        txtImgDate.setText("");
-        txtImgTime.setText("");
 
-        txtFilePath.setText(imgPath);
-        txtOnDeviceSize.setText(imgSize);
+        // Date and Time
+        Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
+        String formattedDateTime = dateTimeFormatter.format(instant); // Get the formatted date as a string
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
+        String formattedTime = timeFormatter.format(instant);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
+        String formattedDate = dateFormatter.format(instant);
+
+        txtImgDateTime.setText(formattedDateTime);
+        txtImgTime.setText(formattedTime);
+        txtImgDate.setText(formattedDate);
+
+        txtImgFilePath.setText(imgPath);
+        txtImgOnDeviceSize.setText(imgSize);
         txtImgMp.setText(imgSize);
         txtImgResolution.setText(imgResolution);
         txtImgName.setText(imgName);
@@ -303,7 +332,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     }
 
     private void setBottomSheetBehavior() {
-        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_bottomSheet));
+        bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.ll_img_bottomSheet));
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override

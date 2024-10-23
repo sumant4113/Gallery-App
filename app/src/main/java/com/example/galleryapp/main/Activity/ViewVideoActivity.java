@@ -100,14 +100,14 @@ public class ViewVideoActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        imgFavorite = findViewById(R.id.img_favorite);
-        imgBackBtn = findViewById(R.id.img_backBtn);
-        imgShare = findViewById(R.id.img_share);
-        imgEdit = findViewById(R.id.img_edit);
-        imgMore = findViewById(R.id.img_more);
-        imgDelete = findViewById(R.id.img_delete);
-        txtImgTime = findViewById(R.id.txt_img_time);
-        txtImgDate = findViewById(R.id.txt_img_date);
+        imgFavorite = findViewById(R.id.img_vid_favorite);
+        imgBackBtn = findViewById(R.id.img_vid_backBtn);
+        imgShare = findViewById(R.id.img_vid_share);
+        imgEdit = findViewById(R.id.img_vid_edit);
+        imgMore = findViewById(R.id.img_vid_more);
+        imgDelete = findViewById(R.id.img_vid_delete);
+        txtImgTime = findViewById(R.id.txt_vid_time);
+        txtImgDate = findViewById(R.id.txt_vid_date);
         vpFullVideo = findViewById(R.id.vpFullVideo);
 //        imgPlayVideoBtn = findViewById(R.id.img_play_videoBtn);
 
@@ -122,9 +122,9 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtVidName = findViewById(R.id.txt_vidName);
         txtVidMp = findViewById(R.id.txt_vidMP);
         txtVidResolution = findViewById(R.id.txt_vidResolution);
-        txtDateTime = findViewById(R.id.txt_dateTime);
-        txtFilePath = findViewById(R.id.txt_filePath);
-        txtOnDeviceSize = findViewById(R.id.txt_onDeviceSize);
+        txtDateTime = findViewById(R.id.txt_vid_dateTime);
+        txtFilePath = findViewById(R.id.txt_vid_filePath);
+        txtOnDeviceSize = findViewById(R.id.txt_vid_onDeviceSize);
 
         if (getIntent() != null) {
             Intent intent = getIntent();
