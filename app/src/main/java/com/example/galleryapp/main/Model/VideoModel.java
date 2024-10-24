@@ -144,7 +144,7 @@ public class VideoModel implements Parcelable {
         this.widthHeight = widthHeight;
     }
 
-    @Override
+    /*@Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
@@ -162,5 +162,5 @@ public class VideoModel implements Parcelable {
         if (dataAdded != null? !dataAdded.equals(videoModel.dataAdded) : videoModel.dataAdded != null) return false;
 
         return true;
-    }
+    }*/
 }

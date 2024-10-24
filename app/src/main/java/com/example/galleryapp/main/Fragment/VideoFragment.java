@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VideoRvAdapter;
@@ -27,19 +28,22 @@ public class VideoFragment extends Fragment {
     private RecyclerView rvVideos;
     private VideoRvAdapter videoRvAdapter;
     private final ArrayList<VideoModel> videosList = new ArrayList<>();
+    private SwipeRefreshLayout swipeRefreshVideoFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_video, container, false);
-        rvVideos = view.findViewById(R.id.rv_video);
 
         initView();
         loadVideos();  // Load videos from storage
+        setupSwipeRefresh(); // Setup SwipeRefreshLayout
         return view;
     }
 
     private void initView() {
-        loadVideos();
+        rvVideos = view.findViewById(R.id.rv_video);
+        swipeRefreshVideoFragment = view.findViewById(R.id.swipeRefresh_videoFragment);
+
         videoRvAdapter = new VideoRvAdapter(getContext(), videosList);
         // solve recycle view lag
         rvVideos.setHasFixedSize(true);
@@ -50,11 +54,21 @@ public class VideoFragment extends Fragment {
 
         rvVideos.setLayoutManager(new GridLayoutManager(getContext(), 3));
         rvVideos.setAdapter(videoRvAdapter);
+
+        loadVideos();
+    }
+
+    private void setupSwipeRefresh() {
+        swipeRefreshVideoFragment.setOnRefreshListener(() -> {
+            loadVideos(); // Reload videos when swiped down
+            swipeRefreshVideoFragment.setRefreshing(false); // Stop the refreshing animation
+        });
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private ArrayList<VideoModel> loadVideos() {
         ArrayList<VideoModel> videosList = new ArrayList<>();
+        videosList.clear(); // Clear the previous list of videos
 
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String orderBy = MediaStore.Video.Media.DATE_ADDED + " DESC";
@@ -71,31 +85,31 @@ public class VideoFragment extends Fragment {
                 MediaStore.Video.Media.DATE_ADDED
         };
 
-        Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, null);
+        try {
+            Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, orderBy);
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    String id = cursor.getString(0);
+                    String path = cursor.getString(1);
+                    String title = cursor.getString(2);
+                    String size = cursor.getString(3);
+                    String width_height = cursor.getString(4);
+                    String duration = cursor.getString(5);
+                    String displayName = cursor.getString(6);
+                    String resolution = cursor.getString(7);
+                    String dateTime = cursor.getString(8);
 
-        if (cursor != null) {
-//            int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-
-            while (cursor.moveToNext()) {
-//                String absolutePathOfVideo = cursor.getString(columnIndexData);
-                String id = cursor.getString(0);
-                String path = cursor.getString(1);
-                String title = cursor.getString(2);
-                String size = cursor.getString(3);
-                String width_height = cursor.getString(4);
-                String duration = cursor.getString(5);
-                String displayName = cursor.getString(6);
-                String resolution = cursor.getString(7);
-                String dateTime = cursor.getString(8);
-
-                VideoModel videos = new VideoModel(id, path, title, size, width_height, duration, displayName, resolution, dateTime);
-                videosList.add(videos);
-
-//                    videosList.add(absolutePathOfVideo);  // Add video paths to the list
+                    VideoModel videos = new VideoModel(id, path, title, size, width_height, duration, displayName, resolution, dateTime);
+                    videosList.add(videos);
+                }
+                cursor.close();
             }
-//            videoRvAdapter.notifyDataSetChanged();  // Notify adapter that data has changed
-            cursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+        videoRvAdapter.notifyDataSetChanged(); // Notify adapter that data has changed
+
         return videosList;
     }
 }

@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,37 +13,37 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.FolderRvAdapter;
 import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class FolderFragment extends Fragment {
 
     private static final String TAG = "FolderFragment";
+    private View view;
 
     private RecyclerView rvFolder;
     private FolderRvAdapter folderRvAdapter;
     private ArrayList<String> folderList = new ArrayList<>();
     private ArrayList<VideoModel> videoModelList = new ArrayList<>();
+    private SwipeRefreshLayout swipeRefreshFolderFragment;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        videoModelList = fetchAllVideos(requireContext());
+//        videoModelList = fetchAllVideos(requireContext());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_folder, container, false);
-        rvFolder = view.findViewById(R.id.rv_folder);
+         view = inflater.inflate(R.layout.fragment_folder, container, false);
 
         initView();
         return view;
@@ -52,6 +51,9 @@ public class FolderFragment extends Fragment {
 
     @SuppressLint("NotifyDataSetChanged")
     private void initView() {
+        rvFolder = view.findViewById(R.id.rv_folder);
+        swipeRefreshFolderFragment = view.findViewById(R.id.swipeRefresh_folderFragment);
+
         videoModelList = fetchAllVideos(requireContext());
 
         if ((folderList != null) && !folderList.isEmpty() && (videoModelList != null)) {
@@ -126,43 +128,4 @@ public class FolderFragment extends Fragment {
         return videoModels;
     }
 
-    public static class FolderDiffCallback extends DiffUtil.Callback {
-
-        private final List<VideoModel> oldList;
-        private final List<VideoModel> newList;
-
-        public FolderDiffCallback(List<VideoModel> oldList, List<VideoModel> newList) {
-            this.oldList = oldList;
-            this.newList = newList;
-        }
-
-        @Override
-        public int getOldListSize() {
-            return oldList.size();
-        }
-
-        @Override
-        public int getNewListSize() {
-            return newList.size();
-        }
-
-        @Override
-        public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-            return oldList.get(oldItemPosition).getPath().equals(newList.get(newItemPosition).getPath());
-        }
-
-        @Override
-        public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-            VideoModel oldItem = oldList.get(oldItemPosition);
-            VideoModel newItem = newList.get(newItemPosition);
-
-            Log.d("DiffUtil", "Comparing " + oldItem.getPath() + " with " + newItem.getPath());
-
-            return (oldItem.getPath() == null ? newItem.getPath() == null : oldItem.getPath().equals(newItem.getPath())) &&
-                    (oldItem.getTitle() == null ? newItem.getTitle() == null : oldItem.getTitle().equals(newItem.getTitle())) &&
-                    (oldItem.getDuration() == null ? newItem.getDuration() == null : oldItem.getDuration().equals(newItem.getDuration()));
-        }
-
-
-    }
 }

@@ -1,6 +1,6 @@
 package com.example.galleryapp.main.Activity;
 
-import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,12 +51,9 @@ public class ViewVideoActivity extends AppCompatActivity {
     private ViewPager vpFullVideo;
     private VPVideoAdapter vpVideoAdapter;
 
-    private ArrayList<String> videoArrayList = new ArrayList<>();
     // For FolderVideo To video
     private ArrayList<VideoModel> videoModelArrayList = new ArrayList<>();
-
     private TextView txtDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
-    //    public static ImageView imgPlayVideoBtn;
     private boolean isWhiteBG = true;
     int position = -1;
 
@@ -71,17 +66,6 @@ public class ViewVideoActivity extends AppCompatActivity {
         showFileProperties(position);
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
     }
-
-    /*@Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
-    }*/
 
     public void toggleVisibility() {
         if (!isWhiteBG) {
@@ -136,7 +120,6 @@ public class ViewVideoActivity extends AppCompatActivity {
             vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
             vpFullVideo.setAdapter(vpVideoAdapter);
             vpFullVideo.setCurrentItem(position);
-
             vpVideoAdapter.notifyDataSetChanged();
 
             vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -186,7 +169,6 @@ public class ViewVideoActivity extends AppCompatActivity {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);  // Or use STATE_COLLAPSED
             }
         });
-
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         imgShare.setOnClickListener(v -> shareFile(position));
         imgDelete.setOnClickListener(v -> deleteFile(position, v));
@@ -216,29 +198,76 @@ public class ViewVideoActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete File")
                 .setMessage(videoModelArrayList.get(position).getTitle())
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    dialog.dismiss();
-                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("OK", (dialog, which) -> {
                     Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             Long.parseLong(videoModelArrayList.get(position).getId()));
                     File file = new File(videoModelArrayList.get(position).getPath());
-                    boolean deleted = file.delete();
-                    if (deleted) {
-                        getApplicationContext().getContentResolver().delete(contentUri, null, null);
-                        videoModelArrayList.remove(position);
-                        vpVideoAdapter.notifyDataSetChanged();
-                        Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
-                    } else {
-                        Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
+                    try {
+                        boolean deleted = file.delete();
+                        if (deleted) {
+                            getApplicationContext().getContentResolver().delete(contentUri, null, null);
+                            videoModelArrayList.remove(position);
+                            vpVideoAdapter.notifyDataSetChanged();
+                            Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
                 }).show();
     }
 
     private void renameFIle(int position, View view) {
-        final Dialog dialog = new Dialog(this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Rename to");
+        EditText editText = new EditText(this);
+        String path = videoModelArrayList.get(position).getPath();
+        File file = new File(path);
+        String videoName = file.getName();
+        videoName = videoName.substring(0, videoName.lastIndexOf("."));
+        editText.setText(videoName);
+        alertDialog.setView(editText);
+        editText.requestFocus();
 
-        dialog.setContentView(R.layout.rename_layout);
+        alertDialog.setPositiveButton("OK", (dialog, which) -> {
+            String newName = editText.getText().toString().trim();
+            if (newName.isEmpty()) {
+                Snackbar.make(view, "Rename failed. New name is empty.", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            String onlyPath = file.getParentFile().getAbsolutePath();
+            String ext = file.getAbsolutePath();
+            ext = ext.substring(ext.lastIndexOf("."));
+            String newPath = onlyPath + "/" + newName + ext;
+            File newFile = new File(newPath);
+            boolean rename = file.renameTo(newFile);
+
+            if (rename) {
+                ContentResolver resolver = getApplicationContext().getContentResolver();
+                resolver.delete(
+                        MediaStore.Files.getContentUri("external"),
+                        MediaStore.MediaColumns.DATA + "=?",
+                        new String[]{file.getAbsolutePath()}
+                );
+
+                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                intent.setData(Uri.fromFile(newFile));
+                getApplicationContext().sendBroadcast(intent);
+                Snackbar.make(view, "Rename Successfully", Snackbar.LENGTH_LONG).show();
+                /*SystemClock.sleep(200);
+                    ((Activity) getApplicationContext()).recreate();*/
+            } else {
+                Snackbar.make(view, "Rename Failed", Snackbar.LENGTH_LONG).show();
+            }
+        });
+
+        alertDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        alertDialog.create().show();
+
+//        final Dialog dialog = new Dialog(this);
+       /* dialog.setContentView(R.layout.rename_layout);
         final EditText etRenameFile = dialog.findViewById(R.id.et_renameFile);
         Button btnRenameFile = dialog.findViewById(R.id.btn_renameFile);
         Button btnCancelRename = dialog.findViewById(R.id.btn_cancelRename);
@@ -248,10 +277,11 @@ public class ViewVideoActivity extends AppCompatActivity {
         nameText = nameText.substring(nameText.lastIndexOf("."));
         etRenameFile.setText(nameText);
         etRenameFile.clearFocus();
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        btnCancelRename.setOnClickListener(v -> {
-            dialog.cancel();
-        });
+        dialog.getWindow().
+
+                setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) {
+        }
+        btnCancelRename.setOnClickListener(v -> {dialog.cancel();});
 
         btnRenameFile.setOnClickListener(v -> {
             String onlyPath = renameFile.getParentFile().getAbsolutePath();
@@ -276,7 +306,7 @@ public class ViewVideoActivity extends AppCompatActivity {
             }
             dialog.dismiss();
         });
-        dialog.show();
+        dialog.show();*/
     }
 
     private void showFileProperties(int position) {
@@ -306,9 +336,9 @@ public class ViewVideoActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }*/
+
         String vidSize = videoModelArrayList.get(position).getSize();
         String sizeWithoutUnits = vidSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
-
         String humanCanRead = null;
         try {
             long sizeInBytes = (long) Double.parseDouble(sizeWithoutUnits);
@@ -358,12 +388,22 @@ public class ViewVideoActivity extends AppCompatActivity {
         Log.d(TAG, "showFileProperties: +-+-path" + vidPath);       // Full path
         Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);        // Image Size number
         Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);  // Give Resolution (Width x Height)
-        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
-        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
+//        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
+//        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
         Log.d(TAG, "showFileProperties: +-+-duration" + duration); // Duration Time
         Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);     // not need
 
     }
+
+   /* private String formatFileSize(long sizeInBytes) {
+        float sizeInMb = (float) sizeInBytes / (1024 * 1024);
+        if (sizeInMb > 1) {
+            return String.format("%.2f MB", sizeInMb);
+        } else {
+            float sizeInKb = (float) sizeInBytes / 1024;
+            return String.format("%.2f KB", sizeInKb);
+        }
+    }*/
 
     // SetUp Bottom Sheet Behavior
     private void setBottomSheetBehavior() {

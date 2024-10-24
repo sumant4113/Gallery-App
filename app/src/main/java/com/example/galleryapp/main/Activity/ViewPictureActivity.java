@@ -276,6 +276,8 @@ public class ViewPictureActivity extends AppCompatActivity {
                             finish();
                             return;
                         }
+                        imageModelArrayList.notify();
+
                         viewPagerPhotoAdapter.notifyDataSetChanged();
 
                         if (imageModelArrayList.size() > 0) {
@@ -303,8 +305,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         String imgSize = imageModelArrayList.get(currentPosition).getSize();
         String imgResolution = imageModelArrayList.get(currentPosition).getResolution();
         String imgDateTaken = imageModelArrayList.get(currentPosition).getDateTaken();
-
-
 
         // Date and Time
         Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));

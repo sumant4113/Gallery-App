@@ -1,7 +1,6 @@
 package com.example.galleryapp.main.Activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;

@@ -2,6 +2,8 @@ package com.example.galleryapp.main.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,12 +41,10 @@ public class VideoRvAdapter extends RecyclerView.Adapter<VideoRvAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Load video thumbnail using Glide
         VideoModel videoModel = videoList.get(position);
-
-/*        Picasso.get().load(videoPath).resize(50, 50)
-            .error(R.drawable.img_error).placeholder(R.drawable.baseline_photo_library_24).centerCrop().into(holder.videoThumbnail);*/
+        String videoPath = videoModel.getPath();
 
         Glide.with(context)
-                .load(videoModel) // Load video thumbnail
+                .load(videoPath) // Load video thumbnail
                 .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
                 .error(R.drawable.img_error)// Error image
                 .fitCenter()
@@ -72,5 +72,10 @@ public class VideoRvAdapter extends RecyclerView.Adapter<VideoRvAdapter.ViewHold
             super(itemView);
             videoThumbnail = itemView.findViewById(R.id.img_video_item); // Assume your item layout has this ImageView
         }
+    }
+
+    private Uri getVideoThumbnail(String videoPath) {
+        // Get the thumbnail URI from the video path
+        return Uri.parse("content://" + MediaStore.Video.Media.EXTERNAL_CONTENT_URI + "/video/" + videoPath);
     }
 }

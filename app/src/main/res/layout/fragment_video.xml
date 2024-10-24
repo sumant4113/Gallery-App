@@ -6,10 +6,16 @@
     android:background="@color/white"
     tools:context=".main.Fragment.VideoFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_video"
-        android:overScrollMode="never"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh_videoFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_video"
+            android:overScrollMode="never"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </FrameLayout>

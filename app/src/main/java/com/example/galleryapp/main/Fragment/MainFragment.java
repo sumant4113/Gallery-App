@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ImageManager;
@@ -31,6 +32,8 @@ public class MainFragment extends Fragment {
     private Context context;
     private ImageManager imageManager;
     private ExecutorService service;
+    private SwipeRefreshLayout swipeRefreshMainFragment;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +50,12 @@ public class MainFragment extends Fragment {
 
     private void initView() {
         rvGallery = view.findViewById(R.id.rv_gallery);
+        swipeRefreshMainFragment = view.findViewById(R.id.swipeRefresh_mainFragment);
+
+        swipeRefreshMainFragment.setOnRefreshListener(() -> {
+            loadImages();
+        });
+
         galleryRvAdapter = new GalleryRvAdapter(getContext(), imagesList);
         service = Executors.newSingleThreadExecutor();
 
@@ -65,6 +74,7 @@ public class MainFragment extends Fragment {
             @Override
             public void run() {
                 loadImages();
+                swipeRefreshMainFragment.setRefreshing(false);
             }
         });
 
@@ -84,8 +94,10 @@ public class MainFragment extends Fragment {
                 imagesList.clear();
                 imagesList.addAll(loadedImages);
                 requireActivity().runOnUiThread(() -> galleryRvAdapter.notifyDataSetChanged());
+                swipeRefreshMainFragment.setRefreshing(false);
             }
         }).start();
+
     }
 
     private ArrayList<ImageModel> loadImagesFromStorage() {

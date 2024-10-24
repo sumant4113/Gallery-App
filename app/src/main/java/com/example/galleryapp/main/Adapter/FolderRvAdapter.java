@@ -10,14 +10,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ViewFolderActivity;
-import com.example.galleryapp.main.Fragment.FolderFragment;
 import com.example.galleryapp.main.Model.VideoModel;
 
 import java.io.File;
@@ -37,14 +35,14 @@ public class FolderRvAdapter extends RecyclerView.Adapter<FolderRvAdapter.MyClas
 
     // Add a method to update the adapter's data using DiffUtil
     public void updateVideoList(ArrayList<VideoModel> newVideoModel) {
-        FolderFragment.FolderDiffCallback diffCallback = new FolderFragment.FolderDiffCallback(this.videoModel, newVideoModel);
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+//        FolderFragment.FolderDiffCallback diffCallback = new FolderFragment.FolderDiffCallback(this.videoModel, newVideoModel);
+//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
 
         this.videoModel.clear();
         this.videoModel.addAll(newVideoModel);
 
         // Apply the updates to the adapter
-        diffResult.dispatchUpdatesTo(this);
+//        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
