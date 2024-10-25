@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.main.Activity.ImageManager;
 import com.example.galleryapp.main.Adapter.GalleryRvAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
 
@@ -30,7 +29,6 @@ public class MainFragment extends Fragment {
     private View view;
     private GalleryRvAdapter galleryRvAdapter;
     private Context context;
-    private ImageManager imageManager;
     private ExecutorService service;
     private SwipeRefreshLayout swipeRefreshMainFragment;
 

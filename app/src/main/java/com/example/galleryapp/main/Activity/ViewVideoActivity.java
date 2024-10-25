@@ -47,7 +47,7 @@ public class ViewVideoActivity extends AppCompatActivity {
     private LinearLayout layoutTopVideo, layoutBottomVideo;
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate, txtImgTime;
+    private TextView txtVidDate, txtVidTime;
     private ViewPager vpFullVideo;
     private VPVideoAdapter vpVideoAdapter;
 
@@ -55,7 +55,7 @@ public class ViewVideoActivity extends AppCompatActivity {
     private ArrayList<VideoModel> videoModelArrayList = new ArrayList<>();
     private TextView txtDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
     private boolean isWhiteBG = true;
-    int position = -1;
+    private int position = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,8 +90,8 @@ public class ViewVideoActivity extends AppCompatActivity {
         imgEdit = findViewById(R.id.img_vid_edit);
         imgMore = findViewById(R.id.img_vid_more);
         imgDelete = findViewById(R.id.img_vid_delete);
-        txtImgTime = findViewById(R.id.txt_vid_time);
-        txtImgDate = findViewById(R.id.txt_vid_date);
+        txtVidTime = findViewById(R.id.txt_vid_time);
+        txtVidDate = findViewById(R.id.txt_vid_date);
         vpFullVideo = findViewById(R.id.vpFullVideo);
 //        imgPlayVideoBtn = findViewById(R.id.img_play_videoBtn);
 
@@ -315,29 +315,11 @@ public class ViewVideoActivity extends AppCompatActivity {
         String vidDisplayName = videoModelArrayList.get(position).getDisplayName();
         String vidPath = videoModelArrayList.get(position).getPath();
         String vidResolution = videoModelArrayList.get(position).getResolution();
-//        String vidsize = videoModelArrayList.get(position).getSize();
         String duration = videoModelArrayList.get(position).getDuration();
         String widthHeight = videoModelArrayList.get(position).getWidthHeight();
         String vidMp = videoModelArrayList.get(position).getDataAdded();
-
-     /*   // Size
-        String humanCanRead = null;
-        long vidSize = Long.parseLong(vidsize);
-        try {
-            if (vidSize < 1024) {
-                humanCanRead = String.format(getString(R.string.size_bytes), (double) vidSize);
-            } else if (vidSize < Math.pow(1024, 2)) {
-                humanCanRead = String.format(getString(R.string.size_kb), (double) vidSize / 1024);
-            } else if (vidSize < Math.pow(1024, 3)) {
-                humanCanRead = String.format(getString(R.string.size_mb), (double) vidSize / Math.pow(1024, 2));
-            } else {
-                humanCanRead = String.format(getString(R.string.size_gb), (double) vidSize / Math.pow(1024, 3));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }*/
-
         String vidSize = videoModelArrayList.get(position).getSize();
+
         String sizeWithoutUnits = vidSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
         String humanCanRead = null;
         try {
@@ -372,8 +354,8 @@ public class ViewVideoActivity extends AppCompatActivity {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
         String formattedDate = dateFormatter.format(instant);
 
-        txtImgDate.setText(formattedDate);
-        txtImgTime.setText(formattedTime);
+        txtVidDate.setText(formattedDate);
+        txtVidTime.setText(formattedTime);
         txtDateTime.setText(formattedDateTime);
 
         txtVidName.setText(vidDisplayName);
@@ -388,22 +370,12 @@ public class ViewVideoActivity extends AppCompatActivity {
         Log.d(TAG, "showFileProperties: +-+-path" + vidPath);       // Full path
         Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);        // Image Size number
         Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);  // Give Resolution (Width x Height)
-//        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
-//        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
+        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
+        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
         Log.d(TAG, "showFileProperties: +-+-duration" + duration); // Duration Time
         Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);     // not need
 
     }
-
-   /* private String formatFileSize(long sizeInBytes) {
-        float sizeInMb = (float) sizeInBytes / (1024 * 1024);
-        if (sizeInMb > 1) {
-            return String.format("%.2f MB", sizeInMb);
-        } else {
-            float sizeInKb = (float) sizeInBytes / 1024;
-            return String.format("%.2f KB", sizeInKb);
-        }
-    }*/
 
     // SetUp Bottom Sheet Behavior
     private void setBottomSheetBehavior() {
@@ -432,7 +404,6 @@ public class ViewVideoActivity extends AppCompatActivity {
                 // Handle slide behavior if needed
             }
         });
-
         // Initially hide the bottom sheet
         bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -462,13 +433,15 @@ public class ViewVideoActivity extends AppCompatActivity {
     private void releaseMediaPlayer() {
         VideoView videoView = findViewById(R.id.video_view);
         if (videoView != null) {
+            videoView.stopPlayback();
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // Ensure the video stops when the activity is stopped
+        releaseMediaPlayer();
+        // Activity Stop then Video Stop
         if (vpVideoAdapter != null) {
             vpVideoAdapter.stopCurrentVideo();
             finish();

@@ -57,7 +57,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
+    private TextView txtImgDate,  txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
     private GestureDetector gestureDetector;
 
@@ -83,7 +83,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         });
         // activity open time only show photo
         enterFullScreen();
-
+        showImageProperties((position));
         vpFullPhoto.setOnClickListener(view -> toggleVisibility());
     }
 
@@ -119,7 +119,6 @@ public class ViewPictureActivity extends AppCompatActivity {
             enterFullScreen();
         }
     }
-
 
     private void exitFullScreen() {
 //        Window window = getWindow();
@@ -193,7 +192,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int position) {
-                    currentPosition = position;
+//                    currentPosition = position;
                     showImageProperties(position);
 
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
@@ -215,7 +214,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         setBottomSheetBehavior();
         imgMore.setOnClickListener(v -> {
-
+            showImageProperties(position);
 //            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
 
             if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
@@ -229,7 +228,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         imgShare.setOnClickListener(v -> shareFile());
         imgBackBtn.setOnClickListener(v -> onBackPressed());
-        imgDelete.setOnClickListener(v -> deleteFile(currentPosition, v));
+        imgDelete.setOnClickListener(v -> deleteFile(position, v));
 
 
     }
@@ -252,45 +251,45 @@ public class ViewPictureActivity extends AppCompatActivity {
     }
 
     // Delete Images
-    private void deleteFile(int currentPosition, View view) {
+    private void deleteFile(int viewPosition, View view) {
         // Make AlertDialog for delete that file
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete this Item?")
-                .setMessage(imageModelArrayList.get(currentPosition).getTitle())
+                .setMessage(imageModelArrayList.get(viewPosition).getTitle())
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     dialog.dismiss();
                 })
                 .setPositiveButton("OK", (dialog, which) -> {
                     Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            Long.parseLong(imageModelArrayList.get(currentPosition).getId()));
-                    File file = new File(imageModelArrayList.get(currentPosition).getPath());
+                            Long.parseLong(imageModelArrayList.get(viewPosition).getId()));
+                    File file = new File(imageModelArrayList.get(viewPosition).getPath());
 
                     boolean deleted = file.delete();
 
                     if (deleted && file.exists()) {
                         getApplicationContext().getContentResolver().delete(contentUri, null, null);
-                        imageModelArrayList.remove(currentPosition);
+                        imageModelArrayList.remove(viewPosition);
 
                         if (imageModelArrayList.isEmpty()) {
                             Toast.makeText(this, "No images more!", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
-                        imageModelArrayList.notify();
+//                        imageModelArrayList.notify();
 
                         viewPagerPhotoAdapter.notifyDataSetChanged();
 
                         if (imageModelArrayList.size() > 0) {
                             int newPos;
-                            if (currentPosition == imageModelArrayList.size()) { // if  last image then show previous one
+                            if (viewPosition == imageModelArrayList.size()) { // if  last image then show previous one
                                 newPos = imageModelArrayList.size() - 1;
                             } else {
-                                newPos = currentPosition; // Show the next image
+                                newPos = viewPosition; // Show the next image
                             }
-                            vpFullPhoto.setCurrentItem(currentPosition, false);
+                            vpFullPhoto.setCurrentItem(viewPosition, false);
                         } else {
-                        }
 
+                        }
                         Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                     } else {
                         Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
@@ -298,14 +297,40 @@ public class ViewPictureActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void showImageProperties(int currentPosition) {
-        String imgId = imageModelArrayList.get(currentPosition).getId();
-        String imgPath = imageModelArrayList.get(currentPosition).getPath();
-        String imgName = imageModelArrayList.get(currentPosition).getTitle();
-        String imgSize = imageModelArrayList.get(currentPosition).getSize();
-        String imgResolution = imageModelArrayList.get(currentPosition).getResolution();
-        String imgDateTaken = imageModelArrayList.get(currentPosition).getDateTaken();
+    private void renameFile(int position, View view) {
 
+    }
+
+    private void showImageProperties(int viewPosition) {
+        String imgId = imageModelArrayList.get(viewPosition).getId();
+        String imgPath = imageModelArrayList.get(viewPosition).getPath();
+        String imgName = imageModelArrayList.get(viewPosition).getTitle();
+        String imgSize = imageModelArrayList.get(viewPosition).getSize();
+        String imgResolution = imageModelArrayList.get(viewPosition).getResolution();
+        String imgDateTaken = imageModelArrayList.get(viewPosition).getDateTaken();
+
+        String sizeWithoutUnits = imgSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
+        String humanCanRead = null;
+        try {
+            long sizeInBytes = (long) Double.parseDouble(sizeWithoutUnits);
+            humanCanRead = null;
+
+            if (sizeInBytes < 1024) {
+                humanCanRead = String.format(getString(R.string.size_bytes), (double) sizeInBytes);
+            } else if (sizeInBytes < Math.pow(1024, 2)) {
+                humanCanRead = String.format(getString(R.string.size_kb), (double) sizeInBytes / 1024);
+            } else if (sizeInBytes < Math.pow(1024, 3)) {
+                humanCanRead = String.format(getString(R.string.size_mb), (double) sizeInBytes / Math.pow(1024, 2));
+            } else {
+                humanCanRead = String.format(getString(R.string.size_gb), (double) sizeInBytes / Math.pow(1024, 3));
+            }
+
+            txtImgOnDeviceSize.setText("On Device (" + humanCanRead + ")");
+        } catch (NumberFormatException e) {
+            // Handle the exception in case the input is invalid
+            Log.e("ViewVideoActivity", "Invalid video size format: " + imgSize, e);
+            txtImgOnDeviceSize.setText("Unknown size");
+        }
         // Date and Time
         Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
@@ -322,7 +347,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         txtImgDate.setText(formattedDate);
 
         txtImgFilePath.setText(imgPath);
-        txtImgOnDeviceSize.setText(imgSize);
+//        txtImgOnDeviceSize.setText(imgSize);
         txtImgMp.setText(imgSize);
         txtImgResolution.setText(imgResolution);
         txtImgName.setText(imgName);
