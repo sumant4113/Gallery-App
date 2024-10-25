@@ -2,6 +2,7 @@ package com.example.galleryapp.main.Fragment;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -108,6 +109,7 @@ public class MainFragment extends Fragment {
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.TITLE,
                 MediaStore.Images.Media.SIZE,
+//                MediaStore.Images.Media.RESOLUTION,
                 MediaStore.Images.Media.DATE_ADDED
         };
 
@@ -119,11 +121,22 @@ public class MainFragment extends Fragment {
                 String path = cursor.getString(1);
                 String title = cursor.getString(2);
                 int size = cursor.getInt(3);
+//                String resolution = cursor.getString(4);
                 String dateTaken = cursor.getString(4);
 
+                // Use BitmapFactory to retrieve image resolution
+                String resolution;
+                try {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(path, options);
+                    resolution = options.outWidth + "x" + options.outHeight;
+                } catch (Exception e) {
+                    resolution = "Unknown";
+                }
                 String humanReadableSize = convertSizeToReadable(size);
 
-                ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, "", dateTaken);
+                ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, resolution, dateTaken);
                 imageModelList.add(imageModel);
             }
             cursor.close();
@@ -181,19 +194,6 @@ public class MainFragment extends Fragment {
                 }
 
                 ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, "", dateTaken);
-                /*String humanCanRead = null;
-                if (size < 1024) {
-                    humanCanRead = String.format(context.getString(R.string.size_bytes), size);
-                } else if (size < Math.pow(1024, 2)) {
-                    humanCanRead = String.format(context.getString(R.string.size_kb), size / 1024);
-                } else if (size < Math.pow(1024, 3)) {
-                    humanCanRead = String.format(context.getString(R.string.size_mb), size / Math.pow(1024, 2));
-                } else {
-                    humanCanRead = String.format(context.getString(R.string.size_gb), size / Math.pow(1024, 3));
-                }
-                String resolution = "";
-
-                ImageModel imageModel = new ImageModel(id, path, title, humanCanRead, resolution, dateTaken);*/
                 imageModelList.add(imageModel);
 
             }
@@ -201,30 +201,4 @@ public class MainFragment extends Fragment {
         }
         return imageModelList;
     }
-    /*if (getContext() != null) {
-            if (Environment.getExternalStorageState().equals(MEDIA_MOUNTED)) {
-                final String[] columns = {
-                        MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID
-                };
-                final String order = MediaStore.Images.Media.DATE_TAKEN + " DESC";
-
-                Cursor cursor = getContext().getContentResolver()
-                        .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                columns, null, null, order);
-                if (cursor != null) {
-                    try {
-                        int count = cursor.getCount();
-//                        txtTotalItem.setText("Total Items: " + count);
-                        for (int i = 0; i < count; i++) {
-                            cursor.moveToPosition(i);
-                            int columIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-//                            imagesList.add(new ImageModel());
-                        }
-                        rvGallery.getAdapter().notifyDataSetChanged();
-                    } finally {
-                        cursor.close();
-                    }
-                }
-            }
-        }*/
 }

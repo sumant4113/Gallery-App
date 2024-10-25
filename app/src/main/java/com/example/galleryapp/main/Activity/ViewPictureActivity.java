@@ -33,10 +33,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class ViewPictureActivity extends AppCompatActivity {
 
@@ -76,11 +76,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         }
         initView();
         showImageProperties((position));
-
-        // In This Activity shows full Image
-        /*View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-        decorView.setSystemUiVisibility(uiOptions);*/
 
         // Set up Gesture Detector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -309,23 +304,23 @@ public class ViewPictureActivity extends AppCompatActivity {
         String imgId = imageModelArrayList.get(viewPosition).getId();
         String imgPath = imageModelArrayList.get(viewPosition).getPath();
         String imgName = imageModelArrayList.get(viewPosition).getTitle();
-        String imgSize = imageModelArrayList.get(viewPosition).getSize();
         String imgResolution = imageModelArrayList.get(viewPosition).getResolution();
         String imgDateTaken = imageModelArrayList.get(viewPosition).getDateTaken();
+        String imgSize = imageModelArrayList.get(viewPosition).getSize();
 
         String sizeWithoutUnits = imgSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
         String humanCanRead = null;
         try {
-            long sizeInBytes = (long) Double.parseDouble(sizeWithoutUnits);
+            double sizeInBytes = Double.parseDouble(sizeWithoutUnits);
 
             if (sizeInBytes < 1024) {
-                humanCanRead = String.format(getString(R.string.size_bytes), (double) sizeInBytes);
+                humanCanRead = String.format("%.2f B", sizeInBytes);
             } else if (sizeInBytes < 1024 * 1024) {
-                humanCanRead = String.format(getString(R.string.size_kb), (double) sizeInBytes / (1024.0));
+                humanCanRead = String.format("%.2f KB", sizeInBytes / (1024.0));
             } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                humanCanRead = String.format(getString(R.string.size_mb), (double) sizeInBytes / (1024.0 * 1024));
+                humanCanRead = String.format("%.2f MB", sizeInBytes / (1024.0 * 1024));
             } else {
-                humanCanRead = String.format(getString(R.string.size_gb), (double) sizeInBytes / (1024.0 * 1024 * 1024));
+                humanCanRead = String.format("%.2f GB", sizeInBytes / (1024.0 * 1024 * 1024));
             }
 
             txtImgOnDeviceSize.setText("On Device (" + humanCanRead + ")");
@@ -335,28 +330,51 @@ public class ViewPictureActivity extends AppCompatActivity {
             txtImgOnDeviceSize.setText("Unknown size");
         }
 
-        // Date and Time
+        // Convert the date taken from String to long
+        long dateTakenMillis = Long.parseLong(imgDateTaken) * 1000; // Convert seconds to milliseconds
+        Date dateTaken = new Date(dateTakenMillis);
+
+        // Create SimpleDateFormat instances for formatting
+        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("EEEE, MMMM dd, yyyy hh:mm a", Locale.getDefault());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
+
+        // Format the date
+        String formattedDateTime = dateTimeFormatter.format(dateTaken);
+        String formattedTime = timeFormatter.format(dateTaken);
+        String formattedDate = dateFormatter.format(dateTaken);
+
+        // Set the formatted date and time to the TextViews
+        txtImgDateTime.setText(formattedDateTime);
+        txtImgTime.setText(formattedTime);
+        txtImgDate.setText(formattedDate);
+        /*// Date and Time
         Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));
+
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
         String formattedDateTime = dateTimeFormatter.format(instant); // Get the formatted date as a string
-
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(ZoneId.systemDefault());
         String formattedTime = timeFormatter.format(instant);
-
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
         String formattedDate = dateFormatter.format(instant);
 
         txtImgDateTime.setText(formattedDateTime);
         txtImgTime.setText(formattedTime);
-        txtImgDate.setText(formattedDate);
+        txtImgDate.setText(formattedDate);*/
 
         txtImgFilePath.setText(imgPath);
 //        txtImgOnDeviceSize.setText(imgSize);
         txtImgMp.setText(imgSize);
-        txtImgResolution.setText(imgResolution);
+//        txtImgResolution.setText(String.format("Size of ImageView: Height: %s Width: %s", String.valueOf(vpFullPhoto.getWidth()), String.valueOf(vpFullPhoto.getHeight())));
+        txtImgResolution.setText(imgResolution+ "px");
         txtImgName.setText(imgName);
 
-        Log.d(TAG, "showImageProperties: +-+-" + imgDateTaken);
+        Log.d(TAG, "showImageProperties: +-+- id" + imgId);
+        Log.d(TAG, "showImageProperties: +-+- path" + imgPath);
+        Log.d(TAG, "showImageProperties: +-+- name" + imgName);
+        Log.d(TAG, "showImageProperties: +-+- resu" + imgResolution);
+        Log.d(TAG, "showImageProperties: +-+- dateTaken" + imgDateTaken);
+        Log.d(TAG, "showImageProperties: +-+- size" + imgSize);
     }
 
     private void setBottomSheetBehavior() {
