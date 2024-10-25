@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
@@ -55,16 +54,15 @@ public class VPPhotoAdapter extends PagerAdapter {
             Glide.with(context).load(imageModel).into(imgFullPhoto);
         }*/
 
-        File file = new File(imageModel.getPath());  // Get the correct image path
-        if (file.exists()) {
-            Glide.with(context)
-                    .load(file)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .override(Target.SIZE_ORIGINAL)
-                    .into(imgFullPhoto);
-        } else {
-            Toast.makeText(context, "File does not exist", Toast.LENGTH_SHORT).show();
-        }
+
+            File file = new File(imageModel.getPath());  // Get the correct image path
+            if (file.exists()) {
+                Glide.with(context)
+                        .load(file)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .override(Target.SIZE_ORIGINAL)
+                        .into(imgFullPhoto);
+            }
 
 
         imgFullPhoto.setOnClickListener(view1 -> {

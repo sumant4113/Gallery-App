@@ -51,13 +51,13 @@ public class ViewPictureActivity extends AppCompatActivity {
     private RelativeLayout mainLayout;
     private VPPhotoAdapter viewPagerPhotoAdapter;
 
-    private int currentPosition = 0; // hold current position ViewPager
+    private int currentPosition; // hold current position ViewPager
     private boolean isWhiteBG = false;
 
     private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
 
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate,  txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
+    private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
     private GestureDetector gestureDetector;
 
@@ -66,7 +66,16 @@ public class ViewPictureActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_picture);
 
+        if (getIntent().hasExtra("image_path") && getIntent().getParcelableArrayListExtra("image_path") != null) {
+            imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
+            position = getIntent().getIntExtra("position", -1);
+        } else {
+            // Handle the case where there is no data passed
+            Toast.makeText(this, "No image data found", Toast.LENGTH_SHORT).show();
+            finish(); // Exit activity if no data is found
+        }
         initView();
+        showImageProperties((position));
 
         // In This Activity shows full Image
         /*View decorView = getWindow().getDecorView();
@@ -83,7 +92,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         });
         // activity open time only show photo
         enterFullScreen();
-        showImageProperties((position));
         vpFullPhoto.setOnClickListener(view -> toggleVisibility());
     }
 
@@ -159,14 +167,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         txtImgOnDeviceSize = findViewById(R.id.txt_img_onDeviceSize);
         txtImgFilePath = findViewById(R.id.txt_img_filePath);
 
-        if (getIntent().hasExtra("image_path") && getIntent().getParcelableArrayListExtra("image_path") != null) {
-            imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
-            position = getIntent().getIntExtra("position", 0);
-        } else {
-            // Handle the case where there is no data passed
-            Toast.makeText(this, "No image data found", Toast.LENGTH_SHORT).show();
-            finish(); // Exit activity if no data is found
-        }
+
 
      /*   if (getIntent().getExtras() != null) {
             // Get Data from Intent
@@ -181,7 +182,7 @@ public class ViewPictureActivity extends AppCompatActivity {
                 vpFullPhoto.setAdapter(viewPagerPhotoAdapter);
             }
             vpFullPhoto.setCurrentItem(position);
-
+            showImageProperties(position); // Show properties for the initial image
             viewPagerPhotoAdapter.notifyDataSetChanged();
 
             vpFullPhoto.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -191,9 +192,9 @@ public class ViewPictureActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onPageSelected(int position) {
-//                    currentPosition = position;
-                    showImageProperties(position);
+                public void onPageSelected(int p) {
+                    currentPosition = p;
+                    showImageProperties(p);
 
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -205,16 +206,19 @@ public class ViewPictureActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageScrollStateChanged(int state) {
+//                    showImageProperties(currentPosition);
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
                 }
+
             });
         }
 
+
         setBottomSheetBehavior();
         imgMore.setOnClickListener(v -> {
-            showImageProperties(position);
+            showImageProperties(vpFullPhoto.getCurrentItem()); // Ensure we show properties for the current image
 //            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
 
             if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
@@ -313,16 +317,15 @@ public class ViewPictureActivity extends AppCompatActivity {
         String humanCanRead = null;
         try {
             long sizeInBytes = (long) Double.parseDouble(sizeWithoutUnits);
-            humanCanRead = null;
 
             if (sizeInBytes < 1024) {
                 humanCanRead = String.format(getString(R.string.size_bytes), (double) sizeInBytes);
-            } else if (sizeInBytes < Math.pow(1024, 2)) {
-                humanCanRead = String.format(getString(R.string.size_kb), (double) sizeInBytes / 1024);
-            } else if (sizeInBytes < Math.pow(1024, 3)) {
-                humanCanRead = String.format(getString(R.string.size_mb), (double) sizeInBytes / Math.pow(1024, 2));
+            } else if (sizeInBytes < 1024 * 1024) {
+                humanCanRead = String.format(getString(R.string.size_kb), (double) sizeInBytes / (1024.0));
+            } else if (sizeInBytes < 1024 * 1024 * 1024) {
+                humanCanRead = String.format(getString(R.string.size_mb), (double) sizeInBytes / (1024.0 * 1024));
             } else {
-                humanCanRead = String.format(getString(R.string.size_gb), (double) sizeInBytes / Math.pow(1024, 3));
+                humanCanRead = String.format(getString(R.string.size_gb), (double) sizeInBytes / (1024.0 * 1024 * 1024));
             }
 
             txtImgOnDeviceSize.setText("On Device (" + humanCanRead + ")");
@@ -331,12 +334,13 @@ public class ViewPictureActivity extends AppCompatActivity {
             Log.e("ViewVideoActivity", "Invalid video size format: " + imgSize, e);
             txtImgOnDeviceSize.setText("Unknown size");
         }
+
         // Date and Time
         Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
         String formattedDateTime = dateTimeFormatter.format(instant); // Get the formatted date as a string
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(ZoneId.systemDefault());
         String formattedTime = timeFormatter.format(instant);
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
@@ -351,7 +355,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         txtImgMp.setText(imgSize);
         txtImgResolution.setText(imgResolution);
         txtImgName.setText(imgName);
-
 
         Log.d(TAG, "showImageProperties: +-+-" + imgDateTaken);
     }
