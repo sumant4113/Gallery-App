@@ -1,6 +1,7 @@
 package com.example.galleryapp.main.Activity;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.graphics.Color;
@@ -8,11 +9,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -225,16 +229,20 @@ public class ViewPictureActivity extends AppCompatActivity {
             }
         });
 
-        imgShare.setOnClickListener(v -> shareFile());
         imgBackBtn.setOnClickListener(v -> onBackPressed());
-        imgDelete.setOnClickListener(v -> deleteFile(position, v));
+        imgShare.setOnClickListener(v -> shareFile(vpFullPhoto.getCurrentItem()));
+        imgDelete.setOnClickListener(v -> deleteFile(vpFullPhoto.getCurrentItem(), v));
+        imgEdit.setOnClickListener(v -> renameFile(vpFullPhoto.getCurrentItem(), v));
+        imgFavorite.setOnClickListener(v -> addFavorite(vpFullPhoto.getCurrentItem()));
+    }
 
+    private void addFavorite(int currentItem) {
 
     }
 
 
-    private void shareFile() {
-        String imagePath = imageModelArrayList.get(currentPosition).getPath();
+    private void shareFile(int position) {
+        String imagePath = imageModelArrayList.get(position).getPath();
         File file = new File(imagePath);
         if (file.exists()) {
             Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
@@ -297,6 +305,70 @@ public class ViewPictureActivity extends AppCompatActivity {
     }
 
     private void renameFile(int position, View view) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Rename :");
+
+        EditText editText = new EditText(this);
+        String path = imageModelArrayList.get(position).getPath();
+        File file = new File(path);
+        String imageName = file.getName();
+        imageName = imageName.substring(0, imageName.lastIndexOf("."));
+        editText.setText(imageName);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+
+        int marginDp = 16;
+        float scale = getResources().getDisplayMetrics().density;
+        int marginPx = (int) (marginDp * scale + 0.5f);
+        params.setMargins((marginPx), (marginPx), (marginPx), (marginPx));
+
+        editText.setLayoutParams(params);
+        editText.setGravity(Gravity.TOP | Gravity.START);
+        editText.setSingleLine(false);
+        editText.setHorizontallyScrolling(false);
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(editText);
+
+        alertDialog.setView(linearLayout);
+        editText.requestFocus();
+
+        alertDialog.setPositiveButton("Ok", (dialog, which) -> {
+            String newName = editText.getText().toString().trim();
+            if (newName.isEmpty()) {
+                Snackbar.make(view, "Rename Failed. New name is Empty.", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            String onlyPath = file.getParentFile().getAbsolutePath();
+            String ext = file.getAbsolutePath();
+            ext = ext.substring(ext.lastIndexOf("."));
+            String newPath = onlyPath + "/" + newName + ext;
+            File newFile = new File(newPath);
+            boolean rename = file.renameTo(newFile);
+
+            if (rename) {
+                ContentResolver resolver = getApplicationContext().getContentResolver();
+                resolver.delete(
+                        MediaStore.Files.getContentUri("external"),
+                        MediaStore.MediaColumns.DATA + "=?",
+                        new String[]{file.getAbsolutePath()}
+                );
+
+                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                intent.setData(Uri.fromFile(newFile));
+                getApplicationContext().sendBroadcast(intent);
+                Snackbar.make(view, "Rename Successfully", Snackbar.LENGTH_LONG).show();
+            } else {
+                Snackbar.make(view, "Rename Failed", Snackbar.LENGTH_LONG).show();
+            }
+        });
+        alertDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        alertDialog.create().show();
 
     }
 
@@ -366,7 +438,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 //        txtImgOnDeviceSize.setText(imgSize);
         txtImgMp.setText(imgSize);
 //        txtImgResolution.setText(String.format("Size of ImageView: Height: %s Width: %s", String.valueOf(vpFullPhoto.getWidth()), String.valueOf(vpFullPhoto.getHeight())));
-        txtImgResolution.setText(imgResolution+ "px");
+        txtImgResolution.setText(imgResolution + "px");
         txtImgName.setText(imgName);
 
         Log.d(TAG, "showImageProperties: +-+- id" + imgId);

@@ -62,7 +62,7 @@ public class ViewFolderActivity extends AppCompatActivity {
 
             // solve recycle view lag
             rvFolder.setHasFixedSize(true);
-            rvFolder.setItemViewCacheSize(50);
+            rvFolder.setItemViewCacheSize(20);
             rvFolder.setDrawingCacheEnabled(true);
             rvFolder.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
             rvFolder.setNestedScrollingEnabled(false);
@@ -78,8 +78,8 @@ public class ViewFolderActivity extends AppCompatActivity {
         ArrayList<VideoModel> videoModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Video.Media.DATE_ADDED + " DESC";
-        String projection[] = {
+        String orderBy = MediaStore.Video.Media.DATE_TAKEN + " DESC"; // DESC = Descending order and ASC = Ascending order
+        String[] projection = {
                 MediaStore.Video.Media._ID,
                 MediaStore.Video.Media.DATA,
                 MediaStore.Video.Media.TITLE,
@@ -92,8 +92,8 @@ public class ViewFolderActivity extends AppCompatActivity {
                 MediaStore.Video.Media.DATE_ADDED
         };
 
-        String selection = MediaStore.Video.Media.DATA + " like?";
-        String selectionArgs[] = new String[]{"%" + folderName + "%"};
+        String selection = MediaStore.Video.Media.DATA + " like?"; // Here like for flexible matching of file and ? makes SQL injection safely insert value
+        String[] selectionArgs = new String[]{"%" + folderName + "%"}; // this is selection that show only this folder type
 
         Cursor cursor = getContentResolver().query(uri, projection, selection, selectionArgs, orderBy);
 
@@ -129,9 +129,9 @@ public class ViewFolderActivity extends AppCompatActivity {
                 int hrs = (duration / (1000 * 60 * 60));
 
                 if (hrs == 0) {
-                    durationFormatted = String.valueOf(min).concat(":".concat(String.format(Locale.UK, "%02d", sec)));
+                    durationFormatted = String.valueOf(min).concat(":".concat(String.format(Locale.getDefault(), "%02d", sec))); // here concat add colon between min & sec, %02d convert 2 digit like (5 -> 05), Locale.getDefault() give mobile default language
                 } else {
-                    durationFormatted = String.valueOf(hrs).concat(":".concat(String.format(Locale.UK, "%02d", min)
+                    durationFormatted = String.valueOf(hrs).concat(":".concat(String.format(Locale.getDefault(), "%02d", min)
                             .concat(String.format(Locale.UK, "%02d", sec))));
                 }
 

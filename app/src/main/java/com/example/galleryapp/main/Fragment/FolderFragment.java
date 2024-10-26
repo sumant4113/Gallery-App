@@ -56,6 +56,11 @@ public class FolderFragment extends Fragment {
 
         videoModelList = fetchAllVideos(requireContext());
 
+        swipeRefreshFolderFragment.setOnRefreshListener(() -> {
+            loadVideos();
+            swipeRefreshFolderFragment.setRefreshing(false);
+        });
+
         if ((folderList != null) && !folderList.isEmpty() && (videoModelList != null)) {
             if (folderRvAdapter == null) {
                 folderRvAdapter = new FolderRvAdapter(getContext(), folderList, videoModelList);
@@ -78,6 +83,18 @@ public class FolderFragment extends Fragment {
             Toast.makeText(getContext(), "can't find Videos", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    public void loadVideos(){
+        new Thread(() -> {
+            ArrayList<VideoModel> loadedVideos = new ArrayList<>();
+            if (!loadedVideos.isEmpty()) {
+                videoModelList.clear();
+                videoModelList.addAll(loadedVideos);
+                requireActivity().runOnUiThread(() -> folderRvAdapter.notifyDataSetChanged());
+                swipeRefreshFolderFragment.setRefreshing(false);
+            }
+        } );
     }
 
     private ArrayList<VideoModel> fetchAllVideos(Context context) {

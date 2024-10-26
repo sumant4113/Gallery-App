@@ -7,7 +7,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputType;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,10 +34,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class ViewVideoActivity extends AppCompatActivity {
 
@@ -53,17 +57,35 @@ public class ViewVideoActivity extends AppCompatActivity {
 
     // For FolderVideo To video
     private ArrayList<VideoModel> videoModelArrayList = new ArrayList<>();
-    private TextView txtDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
+    private TextView txtVidDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
+
+    private int currentVidPosition;
     private boolean isWhiteBG = true;
-    private int position = -1;
+    private int position;
+    private GestureDetector gestureDetector;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_video);
 
+        if (getIntent() != null) {
+            Intent intent = getIntent();
+            videoModelArrayList = intent.getParcelableArrayListExtra("video_path");
+            position = intent.getIntExtra("position", -1);
+        }
+
         initView();
         showFileProperties(position);
+        // Set up Gesture Detector
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                toggleVisibility();
+                return true;
+            }
+        });
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
     }
 
@@ -106,20 +128,17 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtVidName = findViewById(R.id.txt_vidName);
         txtVidMp = findViewById(R.id.txt_vidMP);
         txtVidResolution = findViewById(R.id.txt_vidResolution);
-        txtDateTime = findViewById(R.id.txt_vid_dateTime);
+        txtVidDateTime = findViewById(R.id.txt_vid_dateTime);
         txtFilePath = findViewById(R.id.txt_vid_filePath);
         txtOnDeviceSize = findViewById(R.id.txt_vid_onDeviceSize);
 
-        if (getIntent() != null) {
-            Intent intent = getIntent();
-            videoModelArrayList = intent.getParcelableArrayListExtra("video_path");
-            position = intent.getIntExtra("position", -1);
-        }
-
         if (videoModelArrayList != null && !videoModelArrayList.isEmpty()) {
-            vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
-            vpFullVideo.setAdapter(vpVideoAdapter);
+            if (vpVideoAdapter == null) {
+                vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
+                vpFullVideo.setAdapter(vpVideoAdapter);
+            }
             vpFullVideo.setCurrentItem(position);
+            showFileProperties(position);
             vpVideoAdapter.notifyDataSetChanged();
 
             vpFullVideo.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -128,7 +147,9 @@ public class ViewVideoActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onPageSelected(int position) {
+                public void onPageSelected(int p) {
+                    currentVidPosition = p;
+                    showFileProperties(p);
 
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -160,6 +181,7 @@ public class ViewVideoActivity extends AppCompatActivity {
 
         setBottomSheetBehavior();
         imgMore.setOnClickListener(v -> {
+            showFileProperties(vpFullVideo.getCurrentItem());
 //            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);
             if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
                 // Expand the bottom sheet
@@ -170,9 +192,9 @@ public class ViewVideoActivity extends AppCompatActivity {
             }
         });
         imgBackBtn.setOnClickListener(v -> onBackPressed());
-        imgShare.setOnClickListener(v -> shareFile(position));
-        imgDelete.setOnClickListener(v -> deleteFile(position, v));
-        imgEdit.setOnClickListener(v -> renameFIle(position, v));
+        imgShare.setOnClickListener(v -> shareFile(vpFullVideo.getCurrentItem()));
+        imgDelete.setOnClickListener(v -> deleteFile(vpFullVideo.getCurrentItem(), v));
+        imgEdit.setOnClickListener(v -> renameFIle(vpFullVideo.getCurrentItem(), v));
 
     }
 
@@ -194,20 +216,20 @@ public class ViewVideoActivity extends AppCompatActivity {
 
     }
 
-    private void deleteFile(int position, View view) {
+    private void deleteFile(int ViewPosition, View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete File")
-                .setMessage(videoModelArrayList.get(position).getTitle())
+                .setMessage(videoModelArrayList.get(ViewPosition).getTitle())
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("OK", (dialog, which) -> {
                     Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            Long.parseLong(videoModelArrayList.get(position).getId()));
-                    File file = new File(videoModelArrayList.get(position).getPath());
+                            Long.parseLong(videoModelArrayList.get(ViewPosition).getId()));
+                    File file = new File(videoModelArrayList.get(ViewPosition).getPath());
                     try {
                         boolean deleted = file.delete();
                         if (deleted) {
                             getApplicationContext().getContentResolver().delete(contentUri, null, null);
-                            videoModelArrayList.remove(position);
+                            videoModelArrayList.remove(ViewPosition);
                             vpVideoAdapter.notifyDataSetChanged();
                             Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                         } else {
@@ -222,13 +244,38 @@ public class ViewVideoActivity extends AppCompatActivity {
     private void renameFIle(int position, View view) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         alertDialog.setTitle("Rename to");
+
+        // EditText
         EditText editText = new EditText(this);
         String path = videoModelArrayList.get(position).getPath();
         File file = new File(path);
         String videoName = file.getName();
-        videoName = videoName.substring(0, videoName.lastIndexOf("."));
+//        videoName = videoName.substring(0, videoName.lastIndexOf("."));
         editText.setText(videoName);
-        alertDialog.setView(editText);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
+
+        // LayoutParams for width and height control
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, // Width: fill parent
+                LinearLayout.LayoutParams.WRAP_CONTENT // Height: wrap content
+        );
+// Optional: Add margins (adjust values as needed)
+        int marginDp = 16; // 16dp margin
+        float scale = getResources().getDisplayMetrics().density;
+        int marginPx = (int) (marginDp * scale + 0.5f);
+        params.setMargins(marginPx, marginPx, marginPx, marginPx);
+
+        editText.setLayoutParams(params);
+        editText.setGravity(Gravity.TOP | Gravity.START); // Text alignment
+        editText.setSingleLine(false); // For older devices (API < 23)
+        editText.setHorizontallyScrolling(false); // Prevent horizontal scrolling
+
+        // Create a LinearLayout to hold the EditText (for better control)
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(editText);
+
+        alertDialog.setView(linearLayout);
         editText.requestFocus();
 
         alertDialog.setPositiveButton("OK", (dialog, which) -> {
@@ -309,16 +356,16 @@ public class ViewVideoActivity extends AppCompatActivity {
         dialog.show();*/
     }
 
-    private void showFileProperties(int position) {
-        String vidName = videoModelArrayList.get(position).getTitle();
-        String vidId = videoModelArrayList.get(position).getId();
-        String vidDisplayName = videoModelArrayList.get(position).getDisplayName();
-        String vidPath = videoModelArrayList.get(position).getPath();
-        String vidResolution = videoModelArrayList.get(position).getResolution();
-        String duration = videoModelArrayList.get(position).getDuration();
-        String widthHeight = videoModelArrayList.get(position).getWidthHeight();
-        String vidMp = videoModelArrayList.get(position).getDataAdded();
-        String vidSize = videoModelArrayList.get(position).getSize();
+    private void showFileProperties(int ViewPosition) {
+        String vidName = videoModelArrayList.get(ViewPosition).getTitle();
+        String vidId = videoModelArrayList.get(ViewPosition).getId();
+        String vidDisplayName = videoModelArrayList.get(ViewPosition).getDisplayName();
+        String vidPath = videoModelArrayList.get(ViewPosition).getPath();
+        String vidResolution = videoModelArrayList.get(ViewPosition).getResolution();
+        String duration = videoModelArrayList.get(ViewPosition).getDuration();
+        String widthHeight = videoModelArrayList.get(ViewPosition).getWidthHeight();
+        String vidMp = videoModelArrayList.get(ViewPosition).getDataAdded();
+        String vidSize = videoModelArrayList.get(ViewPosition).getSize();
 
         String sizeWithoutUnits = vidSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
         String humanCanRead = null;
@@ -336,27 +383,27 @@ public class ViewVideoActivity extends AppCompatActivity {
                 humanCanRead = String.format(getString(R.string.size_gb), (double) sizeInBytes / Math.pow(1024, 3));
             }
 
-            txtOnDeviceSize.setText("On Device (" + humanCanRead + ")");
+            txtOnDeviceSize.setText("On Device (" + vidSize + ")");
         } catch (NumberFormatException e) {
             // Handle the exception in case the input is invalid
             Log.e("ViewVideoActivity", "Invalid video size format: " + vidSize, e);
             txtOnDeviceSize.setText("Unknown size");
         }
 
-        // Date and Time
-        Instant instant = Instant.ofEpochSecond(Long.parseLong(vidMp));
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
-        String formattedDateTime = dateTimeFormatter.format(instant); // Get the formatted date as a string
+        long dateTakenMillisecond = Long.parseLong(vidMp) * 1000;
+        Date dateTakenVid = new Date(dateTakenMillisecond);
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm").withZone(ZoneId.systemDefault());
-        String formattedTime = timeFormatter.format(instant);
+        SimpleDateFormat vidDateTimeFormatter = new SimpleDateFormat("EEEE, MMMM dd, yyyy hh:mm a", Locale.getDefault());
+        SimpleDateFormat vidTimeFormatter = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        SimpleDateFormat vidDateFormatter = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
-        String formattedDate = dateFormatter.format(instant);
+        String vidFormattedDateTime = vidDateTimeFormatter.format(dateTakenVid);
+        String vidFormattedTime = vidTimeFormatter.format(dateTakenVid);
+        String vidFormattedDate = vidDateFormatter.format(dateTakenVid);
 
-        txtVidDate.setText(formattedDate);
-        txtVidTime.setText(formattedTime);
-        txtDateTime.setText(formattedDateTime);
+        txtVidDate.setText(vidFormattedDate);
+        txtVidTime.setText(vidFormattedTime);
+        txtVidDateTime.setText(vidFormattedDateTime);
 
         txtVidName.setText(vidDisplayName);
         txtVidMp.setText(duration);
@@ -430,13 +477,6 @@ public class ViewVideoActivity extends AppCompatActivity {
         releaseMediaPlayer();
     }
 
-    private void releaseMediaPlayer() {
-        VideoView videoView = findViewById(R.id.video_view);
-        if (videoView != null) {
-            videoView.stopPlayback();
-        }
-    }
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -447,6 +487,13 @@ public class ViewVideoActivity extends AppCompatActivity {
             finish();
         }
         finish();
+    }
+
+    private void releaseMediaPlayer() {
+        VideoView videoView = findViewById(R.id.video_view);
+        if (videoView != null) {
+            videoView.stopPlayback();
+        }
     }
 
 

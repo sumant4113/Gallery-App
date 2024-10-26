@@ -103,7 +103,7 @@ public class MainFragment extends Fragment {
         ArrayList<ImageModel> imageModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
+        String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
         String[] projection = {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
@@ -160,7 +160,7 @@ public class MainFragment extends Fragment {
         ArrayList<ImageModel> imageModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
+        String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
         String[] projection = {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
