@@ -61,7 +61,7 @@ public class MainFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         // solve recycle view lag
         rvGallery.setHasFixedSize(true);
-        rvGallery.setItemViewCacheSize(50);
+        rvGallery.setItemViewCacheSize(20);
         rvGallery.setDrawingCacheEnabled(true);
         rvGallery.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
         rvGallery.setNestedScrollingEnabled(false);
@@ -112,8 +112,13 @@ public class MainFragment extends Fragment {
 //                MediaStore.Images.Media.RESOLUTION,
                 MediaStore.Images.Media.DATE_ADDED
         };
+        String selection = MediaStore.Images.Media.DATA + " like?";
 
-        Cursor cursor = getContext().getContentResolver().query(uri, projection, null, null, orderBy);
+        String[] selectionArgs = new String[]{"%Screenshots%"};
+
+        Cursor cursor = getContext().getContentResolver().query(
+                uri, projection,
+                selection, selectionArgs, orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -171,9 +176,11 @@ public class MainFragment extends Fragment {
         };
 
         String selection = MediaStore.Images.Media.DATA + " like?";
+//        String[] selectionArgs = new String[]{"%" +  + "%"}; // this is selection that show only this folder type
+        String[] selectionArgs = new String[]{"%Screenshots%"};
 
         Cursor cursor = getContext().getContentResolver()
-                .query(uri, projection, null, null, orderBy);
+                .query(uri, projection, selection, selectionArgs, orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {

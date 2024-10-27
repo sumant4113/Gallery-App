@@ -15,6 +15,7 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -80,7 +81,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         }
         initView();
         showImageProperties((position));
-
         // Set up Gesture Detector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -104,6 +104,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 //                        | View.SYSTEM_UI_FLAG_FULLSCREEN // Hide status bar
 //                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY // Keep the mode sticky
 //        );+
+
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -112,6 +113,26 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().hide(WindowInsetsCompat.Type.statusBars());
             getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
         }
+    }
+    private void enableEdgeToEdge() {
+        Window window = getWindow();
+
+        // Set the window to full screen and transparent
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false);
+        }
+        window.getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        );
+
+        // Set navigation bar and status bar to be transparent
+        window.setStatusBarColor(Color.TRANSPARENT);
+        window.setNavigationBarColor(Color.TRANSPARENT);
     }
 
     public void toggleVisibility() {
@@ -138,6 +159,16 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().show(WindowInsetsCompat.Type.statusBars());
             getWindow().getInsetsController().show(WindowInsetsCompat.Type.navigationBars());
         }
+    }
+    private void enterFullScreenForViewPager() {
+        Window window = getWindow();
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+        // Set the ViewPager to edge-to-edge
+        vpFullPhoto.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 
     private void initView() {
@@ -194,7 +225,6 @@ public class ViewPictureActivity extends AppCompatActivity {
                 public void onPageSelected(int p) {
                     currentPosition = p;
                     showImageProperties(p);
-
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
@@ -239,7 +269,6 @@ public class ViewPictureActivity extends AppCompatActivity {
     private void addFavorite(int currentItem) {
 
     }
-
 
     private void shareFile(int position) {
         String imagePath = imageModelArrayList.get(position).getPath();
