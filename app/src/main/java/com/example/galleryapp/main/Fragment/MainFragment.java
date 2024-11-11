@@ -114,7 +114,7 @@ public class MainFragment extends Fragment {
         };
         String selection = MediaStore.Images.Media.DATA + " like?";
 
-        String[] selectionArgs = new String[]{"%Screenshots%"};
+        String[] selectionArgs = new String[]{"%Whatsapp Image%"};
 
         Cursor cursor = getContext().getContentResolver().query(
                 uri, projection,
@@ -177,7 +177,8 @@ public class MainFragment extends Fragment {
 
         String selection = MediaStore.Images.Media.DATA + " like?";
 //        String[] selectionArgs = new String[]{"%" +  + "%"}; // this is selection that show only this folder type
-        String[] selectionArgs = new String[]{"%Screenshots%"};
+//        String[] selectionArgs = new String[]{"%Screenshots%"};
+        String[] selectionArgs = new String[]{"%Whatsapp Image%"};
 
         Cursor cursor = getContext().getContentResolver()
                 .query(uri, projection, selection, selectionArgs, orderBy);
