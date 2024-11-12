@@ -40,7 +40,7 @@
             android:name=".main.Activity.HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".main.SplashActivity"
+            android:name=".main.Activity.SplashActivity"
             android:exported="true">
 
             <!-- android:theme="@style/SplashScreen"> -->

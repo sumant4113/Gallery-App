@@ -211,7 +211,7 @@ public class ViewVideoActivity extends AppCompatActivity {
             Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
         } else {
             // If any Error then...
-            Toast.makeText(this, "Video file not found", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Video file not found", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -233,7 +233,7 @@ public class ViewVideoActivity extends AppCompatActivity {
                             vpVideoAdapter.notifyDataSetChanged();
                             Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make( view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);

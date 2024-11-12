@@ -34,6 +34,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
+import com.example.galleryapp.main.room.AppDataBase;
+import com.example.galleryapp.main.room.FavoriteItem;
+import com.example.galleryapp.main.room.FavoriteItemDao;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -61,6 +64,8 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
 
+    private FavoriteItem item;
+    private String currentItemUri; // URI of current item, this for fav.item
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
     private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
@@ -197,7 +202,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         txtImgOnDeviceSize = findViewById(R.id.txt_img_onDeviceSize);
         txtImgFilePath = findViewById(R.id.txt_img_filePath);
 
-
+        currentItemUri = getIntent().getStringExtra("ITEM_URI");
 
      /*   if (getIntent().getExtras() != null) {
             // Get Data from Intent
@@ -268,7 +273,32 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private void addFavorite(int currentItem) {
 
+        Toast.makeText(this, "Add to Favorite", Toast.LENGTH_SHORT).show();
+        updateFavoriteBtn();
     }
+
+    private void updateFavoriteBtn() {
+        AppDataBase db = AppDataBase.getInstance(this);
+        FavoriteItemDao dao = db.favoriteItemDao();
+
+//        boolean isFavorite = dao.;
+//        if (isFavorite) {
+//            imgFavorite.setImageResource(R.drawable.img_heart_filled);
+//        } else {
+//            imgFavorite.setImageResource(R.drawable.img_heart); // Change to empty heart
+//        }
+    }
+
+    private void toggleFavorite() {
+        AppDataBase db = AppDataBase.getInstance(this);
+        FavoriteItemDao dao = db.favoriteItemDao();
+
+//        boolean isCurrentlyFavorite = dao.isFavorite(currentItemUri);
+//        if (isCurrentlyFavorite) {
+//            dao.updateFavoriteStatus();
+//        }
+    }
+
 
     private void shareFile(int position) {
         String imagePath = imageModelArrayList.get(position).getPath();

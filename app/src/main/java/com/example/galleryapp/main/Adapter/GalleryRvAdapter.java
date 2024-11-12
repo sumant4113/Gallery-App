@@ -3,8 +3,6 @@ package com.example.galleryapp.main.Adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,23 +13,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ViewPictureActivity;
 import com.example.galleryapp.main.Model.ImageModel;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.ViewHolder> {
 
     private static final String TAG = "GalleryAdapter";
+
     private final Context context;
-    private ArrayList<ImageModel> image_list = new ArrayList<>();
+    private ArrayList<ImageModel> image_list;
 
     public GalleryRvAdapter(Context context, ArrayList<ImageModel> image_list) {
         this.context = context;
@@ -52,16 +46,16 @@ public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.View
         File image_file = new File(imageModel.getPath());
 
         if (image_file.exists()) {
-            // Load image into ImageView (e.g., using Glide or Picasso)
             Glide.with(context)
                     .load(image_file)
                     .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                    .thumbnail(0.1f)
+                    .override(300, 300)  // Resize image
                     .into(holder.imgGalleryItem);
 
         }
 
 //        File image_file = new File(String.valueOf(image_list.get(position)));
-
        /* if (image_file.exists()) {// File is exists
             if (isHeifOrHeic(image_file.getName())) { // check heif or heic
                 try { // in try block convert heif to bitmap
@@ -108,14 +102,14 @@ public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.View
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-       private final ImageView imgGalleryItem;
+        private final ImageView imgGalleryItem;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgGalleryItem = itemView.findViewById(R.id.img_gallery_item);
         }
     }
 
-    // Convert heif to bitmap
+/*    // Convert heif to bitmap
     public Bitmap convertHeifToBitMap(String heifFilePath) throws IOException {
         File file = new File(heifFilePath);
         InputStream is = new FileInputStream(file);
@@ -128,5 +122,5 @@ public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.View
     private boolean isHeifOrHeic(String fileName) {
         String fileNameLower = fileName.toLowerCase();
         return fileNameLower.endsWith("heif") || fileNameLower.endsWith("heic");
-    }
+    }*/
 }

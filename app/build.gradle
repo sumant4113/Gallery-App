@@ -63,5 +63,10 @@ dependencies {
     // Shimmer Effect
     implementation libs.shimmer
 
+    // Room DB
+    implementation libs.androidx.room.runtime
+    annotationProcessor libs.androidx.room.compiler
+//    implementation libs.room.ktx // For Kotlin Coroutines support
+
 
 }

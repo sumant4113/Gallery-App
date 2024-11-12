@@ -76,13 +76,19 @@ public class MainFragment extends Fragment {
                 swipeRefreshMainFragment.setRefreshing(false);
             }
         });
-
-        requireActivity().runOnUiThread(new Runnable() {
+        ArrayList<ImageModel> loadedImages = loadImagesFromStorage();
+        requireActivity().runOnUiThread(() -> {
+            imagesList.clear();
+            imagesList.addAll(loadedImages);
+            galleryRvAdapter.notifyDataSetChanged();
+            swipeRefreshMainFragment.setRefreshing(false);
+        });
+       /* requireActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
             }
-        });
+        });*/
 
     }
 
@@ -103,14 +109,14 @@ public class MainFragment extends Fragment {
         ArrayList<ImageModel> imageModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+        String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
         String[] projection = {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.TITLE,
                 MediaStore.Images.Media.SIZE,
 //                MediaStore.Images.Media.RESOLUTION,
-                MediaStore.Images.Media.DATE_ADDED
+                MediaStore.Images.Media.DATE_TAKEN
         };
         String selection = MediaStore.Images.Media.DATA + " like?";
 
@@ -118,7 +124,7 @@ public class MainFragment extends Fragment {
 
         Cursor cursor = getContext().getContentResolver().query(
                 uri, projection,
-                selection, selectionArgs, orderBy);
+                null, null, orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -165,23 +171,23 @@ public class MainFragment extends Fragment {
         ArrayList<ImageModel> imageModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+        String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
         String[] projection = {
                 MediaStore.Images.Media._ID,
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.TITLE,
                 MediaStore.Images.Media.SIZE,
 //                MediaStore.Images.Media.RESOLUTION,
-                MediaStore.Images.Media.DATE_ADDED
+                MediaStore.Images.Media.DATE_TAKEN
         };
 
         String selection = MediaStore.Images.Media.DATA + " like?";
 //        String[] selectionArgs = new String[]{"%" +  + "%"}; // this is selection that show only this folder type
 //        String[] selectionArgs = new String[]{"%Screenshots%"};
-        String[] selectionArgs = new String[]{"%Whatsapp Image%"};
+        String[] selectionArgs = new String[]{};
 
         Cursor cursor = getContext().getContentResolver()
-                .query(uri, projection, selection, selectionArgs, orderBy);
+                .query(uri, projection, null, null , orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {

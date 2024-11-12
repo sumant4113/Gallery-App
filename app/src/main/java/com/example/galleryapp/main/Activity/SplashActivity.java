@@ -1,4 +1,4 @@
-package com.example.galleryapp.main;
+package com.example.galleryapp.main.Activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -8,7 +8,6 @@ import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.galleryapp.R;
-import com.example.galleryapp.main.Activity.HomeActivity;
 import com.example.galleryapp.main.Fragment.MainFragment;
 
 @SuppressLint("CustomSplashScreen")
