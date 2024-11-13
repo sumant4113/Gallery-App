@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_createAlbum"
+        android:icon="@drawable/img_image_24"
+        android:title="Create Album" />
+    <item
+        android:id="@+id/menu_favoriteItem"
+        android:icon="@drawable/img_heart"
+        android:title="Favorite Items" />
+    <item
+        android:id="@+id/menu_rateUs"
+        android:icon="@drawable/media3_icon_star_filled"
+        android:title="Rate Us" />
+    <item
+        android:id="@+id/menu_shareApp"
+        android:icon="@drawable/media3_icon_share"
+        android:title="Share App" />
+    <item
+        android:id="@+id/menu_privacyPolicy"
+        android:icon="@drawable/img_heart"
+        android:title="Privacy Policy" />
+    <item
+        android:id="@+id/menu_aboutUs"
+        android:icon="@drawable/img_heart"
+        android:title="About Us" />
+
+</menu>

@@ -116,15 +116,15 @@ public class MainFragment extends Fragment {
                 MediaStore.Images.Media.TITLE,
                 MediaStore.Images.Media.SIZE,
 //                MediaStore.Images.Media.RESOLUTION,
-                MediaStore.Images.Media.DATE_TAKEN
+                MediaStore.Images.Media.DATE_ADDED
         };
         String selection = MediaStore.Images.Media.DATA + " like?";
 
-        String[] selectionArgs = new String[]{"%Whatsapp Image%"};
+        String[] selectionArgs = new String[]{"%Camera%"};
 
         Cursor cursor = getContext().getContentResolver().query(
                 uri, projection,
-                null, null, orderBy);
+                selection, selectionArgs, orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -178,16 +178,16 @@ public class MainFragment extends Fragment {
                 MediaStore.Images.Media.TITLE,
                 MediaStore.Images.Media.SIZE,
 //                MediaStore.Images.Media.RESOLUTION,
-                MediaStore.Images.Media.DATE_TAKEN
+                MediaStore.Images.Media.DATE_ADDED
         };
 
         String selection = MediaStore.Images.Media.DATA + " like?";
 //        String[] selectionArgs = new String[]{"%" +  + "%"}; // this is selection that show only this folder type
-//        String[] selectionArgs = new String[]{"%Screenshots%"};
-        String[] selectionArgs = new String[]{};
+        String[] selectionArgs = new String[]{"%Camera%"};
+//        String[] selectionArgs = new String[]{};
 
         Cursor cursor = getContext().getContentResolver()
-                .query(uri, projection, null, null , orderBy);
+                .query(uri, projection, selection, selectionArgs , orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {

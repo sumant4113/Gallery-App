@@ -312,48 +312,6 @@ public class ViewVideoActivity extends AppCompatActivity {
 
         alertDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         alertDialog.create().show();
-
-//        final Dialog dialog = new Dialog(this);
-       /* dialog.setContentView(R.layout.rename_layout);
-        final EditText etRenameFile = dialog.findViewById(R.id.et_renameFile);
-        Button btnRenameFile = dialog.findViewById(R.id.btn_renameFile);
-        Button btnCancelRename = dialog.findViewById(R.id.btn_cancelRename);
-
-        final File renameFile = new File(videoModelArrayList.get(position).getPath());
-        String nameText = renameFile.getName();
-        nameText = nameText.substring(nameText.lastIndexOf("."));
-        etRenameFile.setText(nameText);
-        etRenameFile.clearFocus();
-        dialog.getWindow().
-
-                setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE) {
-        }
-        btnCancelRename.setOnClickListener(v -> {dialog.cancel();});
-
-        btnRenameFile.setOnClickListener(v -> {
-            String onlyPath = renameFile.getParentFile().getAbsolutePath();
-            String ext = renameFile.getAbsolutePath();
-            ext = ext.substring(0, ext.lastIndexOf("."));
-            String newPath = onlyPath + "/" + etRenameFile.getText().toString() + ext;
-            File newFile = new File(newPath);
-            boolean rename = renameFile.renameTo(newFile);
-
-            if (rename) {
-                getApplicationContext().getContentResolver().delete(
-                        MediaStore.Files.getContentUri("external"),
-                        MediaStore.MediaColumns.DATA + "=?",
-                        new String[]{renameFile.getAbsolutePath()}
-                );
-                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                intent.setData(Uri.fromFile(newFile));
-                getApplicationContext().sendBroadcast(intent);
-                Snackbar.make(view, "Rename Successfully.", Snackbar.LENGTH_SHORT).show();
-            } else {
-                Snackbar.make(view, "Rename Failed.", Snackbar.LENGTH_SHORT).show();
-            }
-            dialog.dismiss();
-        });
-        dialog.show();*/
     }
 
     private void showFileProperties(int ViewPosition) {

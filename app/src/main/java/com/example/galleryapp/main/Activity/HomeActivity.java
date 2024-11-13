@@ -1,12 +1,16 @@
 package com.example.galleryapp.main.Activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
@@ -15,6 +19,7 @@ import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.ViewP_Frag_PagerAdapter;
 import com.example.galleryapp.main.Fragment.MainFragment;
 import com.example.galleryapp.main.PermissionManager;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 
 public class HomeActivity extends AppCompatActivity {
@@ -24,6 +29,9 @@ public class HomeActivity extends AppCompatActivity {
 
     private static final String TAG = "HomeActivity";
     private MainFragment mainFragment;
+    private NavigationView navigationView;
+    private DrawerLayout drawerLayout;
+    private ImageView imgDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +43,35 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        navigationView = findViewById(R.id.navigation_view);
         tabLayout = findViewById(R.id.tabLayout);
         viewPager = findViewById(R.id.viewPager);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        imgDrawer = findViewById(R.id.img_drawer);
+
+        imgDrawer.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+//            drawerLayout.closeDrawer(GravityCompat.START);
+
+            int itemId = item.getItemId();
+            if (itemId == R.id.menu_createAlbum) {
+                Toast.makeText(this, "Create Album", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.menu_favoriteItem) {
+                startActivity(new Intent(this, ViewFavoriteActivity.class));
+            } else if (itemId == R.id.menu_rateUs) {
+                Toast.makeText(this, "Rate Us", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.menu_shareApp) {
+                Toast.makeText(this, "Share App", Toast.LENGTH_SHORT).show();
+            } else if (itemId == R.id.menu_privacyPolicy) {
+                Toast.makeText(this, "Privacy Policy", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "About Us", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        });
 
         mainFragment = new MainFragment();
         // App start and show MainFragment and images
@@ -49,6 +84,7 @@ public class HomeActivity extends AppCompatActivity {
         viewPager.setAdapter(vpGAdapter);
         tabLayout.setupWithViewPager(viewPager);
     }
+
     private void requestPermissions() {
         if (PermissionManager.hasAllPermissions(this, new String[]{
                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -96,7 +132,7 @@ public class HomeActivity extends AppCompatActivity {
                 openSetting.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(openSetting);*//*
 
-              *//*  Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+     *//*  Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.fromParts("package", getPackageName(), null));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);*//*
@@ -149,6 +185,15 @@ public class HomeActivity extends AppCompatActivity {
 //            Objects.requireNonNull(mainFragment).loadImages(HomeActivity.this);
 
 //            Toast.makeText(this, "Permissions are still missing. Please grant them.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

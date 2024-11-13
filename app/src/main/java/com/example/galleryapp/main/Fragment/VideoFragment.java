@@ -82,7 +82,7 @@ public class VideoFragment extends Fragment {
                 MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.DISPLAY_NAME,
                 MediaStore.Video.Media.RESOLUTION,
-                MediaStore.Video.Media.DATE_ADDED
+                MediaStore.Video.Media.DATE_TAKEN
         };
 
         try {
@@ -99,7 +99,8 @@ public class VideoFragment extends Fragment {
                     String resolution = cursor.getString(7);
                     String dateTime = cursor.getString(8);
 
-                    VideoModel videos = new VideoModel(id, path, title, size, width_height, duration, displayName, resolution, dateTime);
+                    VideoModel videos = new VideoModel(id, path, title, size, width_height,
+                            duration, displayName, resolution, dateTime);
                     videosList.add(videos);
                 }
                 cursor.close();

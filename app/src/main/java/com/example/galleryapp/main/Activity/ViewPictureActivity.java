@@ -273,6 +273,12 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private void addFavorite(int currentItem) {
 
+        ImageModel favoriteItem = imageModelArrayList.get(currentItem);
+//        FavoriteItem item = new FavoriteItem()
+//        if (favoriteItem.isFavorite()) {
+//
+//        }
+
         Toast.makeText(this, "Add to Favorite", Toast.LENGTH_SHORT).show();
         updateFavoriteBtn();
     }
