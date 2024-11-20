@@ -34,9 +34,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
-import com.example.galleryapp.main.room.AppDataBase;
 import com.example.galleryapp.main.room.FavoriteItem;
-import com.example.galleryapp.main.room.FavoriteItemDao;
+import com.example.galleryapp.main.sqlite.FavDbHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -70,6 +69,9 @@ public class ViewPictureActivity extends AppCompatActivity {
     private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
     private GestureDetector gestureDetector;
+
+    private FavDbHelper dbHelper;
+    private ImageModel currentImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +121,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
         }
     }
+
     private void enableEdgeToEdge() {
         Window window = getWindow();
 
@@ -165,6 +168,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             getWindow().getInsetsController().show(WindowInsetsCompat.Type.navigationBars());
         }
     }
+
     private void enterFullScreenForViewPager() {
         Window window = getWindow();
         window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -228,6 +232,8 @@ public class ViewPictureActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int p) {
+                    currentImage = getImageAtListPosition(position);
+
                     currentPosition = p;
                     showImageProperties(p);
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
@@ -271,40 +277,45 @@ public class ViewPictureActivity extends AppCompatActivity {
         imgFavorite.setOnClickListener(v -> addFavorite(vpFullPhoto.getCurrentItem()));
     }
 
+    private void updateFavoriteIcon() {
+        if (currentImage != null) {
+            if (dbHelper.isFavorite(currentImage.getId())) {
+                imgFavorite.setImageResource(R.drawable.img_heart_filled); // Use your red heart drawable
+            } else {
+                imgFavorite.setImageResource(R.drawable.img_heart); // Use your white heart drawable
+            }
+        }
+    }
+    private ImageModel getImageAtListPosition(int position) {
+        // Get the image directly from imageModelArrayList based on ViewPager position
+        if (position >= 0 && position < imageModelArrayList.size()) {
+            return imageModelArrayList.get(position);
+        }
+        return null;
+    }
     private void addFavorite(int currentItem) {
+        currentImage = getImageAtListPosition(currentItem); // Get the current image based on the position
 
-        ImageModel favoriteItem = imageModelArrayList.get(currentItem);
-//        FavoriteItem item = new FavoriteItem()
-//        if (favoriteItem.isFavorite()) {
-//
-//        }
+        if (currentImage == null) {
+            Toast.makeText(this, "No image loaded yet", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        Toast.makeText(this, "Add to Favorite", Toast.LENGTH_SHORT).show();
-        updateFavoriteBtn();
+        String id = currentImage.getId();
+        String path = currentImage.getPath();
+        String title = currentImage.getTitle();
+        String type = "image"; // or "video" based on your logic
+
+        if (dbHelper.isFavorite(id)) {
+            dbHelper.removeFav(id);
+            Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show();
+            imgFavorite.setImageResource(R.drawable.img_heart); // Change to white heart
+        } else {
+            dbHelper.addFav(id, path, type, title);
+            Toast.makeText(this, "Added to Favorites", Toast.LENGTH_SHORT).show();
+            imgFavorite.setImageResource(R.drawable.img_heart_filled); // Change to red heart
+        }
     }
-
-    private void updateFavoriteBtn() {
-        AppDataBase db = AppDataBase.getInstance(this);
-        FavoriteItemDao dao = db.favoriteItemDao();
-
-//        boolean isFavorite = dao.;
-//        if (isFavorite) {
-//            imgFavorite.setImageResource(R.drawable.img_heart_filled);
-//        } else {
-//            imgFavorite.setImageResource(R.drawable.img_heart); // Change to empty heart
-//        }
-    }
-
-    private void toggleFavorite() {
-        AppDataBase db = AppDataBase.getInstance(this);
-        FavoriteItemDao dao = db.favoriteItemDao();
-
-//        boolean isCurrentlyFavorite = dao.isFavorite(currentItemUri);
-//        if (isCurrentlyFavorite) {
-//            dao.updateFavoriteStatus();
-//        }
-    }
-
 
     private void shareFile(int position) {
         String imagePath = imageModelArrayList.get(position).getPath();

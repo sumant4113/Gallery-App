@@ -1,8 +1,8 @@
 package com.example.galleryapp.main.Activity;
 
+import android.database.Cursor;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -10,15 +10,19 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
+import com.example.galleryapp.main.Adapter.FavoriteAdapter;
+import com.example.galleryapp.main.sqlite.FavDbHelper;
 
 public class ViewFavoriteActivity extends AppCompatActivity {
 
-    public RecyclerView rvFavItems;
+
+    private RecyclerView rvFavItems;
+    private FavoriteAdapter adapter;
+    private FavDbHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_view_favorite);
 
         initView();
@@ -36,5 +40,10 @@ public class ViewFavoriteActivity extends AppCompatActivity {
 
     }
 
-
+    private void loadFavorites() {
+        dbHelper = new FavDbHelper(this);
+        Cursor cursor = dbHelper.getAllFavorite();
+        adapter = new FavoriteAdapter(this, cursor);
+        rvFavItems.setAdapter(adapter);
+    }
 }

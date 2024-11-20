@@ -10,7 +10,6 @@ import androidx.viewpager.widget.PagerAdapter;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.Target;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ViewPictureActivity;
 import com.example.galleryapp.main.Model.ImageModel;
@@ -48,22 +47,14 @@ public class VPPhotoAdapter extends PagerAdapter {
         View view = LayoutInflater.from(context).inflate(R.layout.item_image_slider, container, false);
         TouchImageView imgFullPhoto = view.findViewById(R.id.img_fullPhoto);
 
-//        image_File = getIntent().getStringExtra("image_file");
-//        File file = new File(String.valueOf(imageList));
-      /*  if (file.exists()) {
-            Glide.with(context).load(imageModel).into(imgFullPhoto);
-        }*/
-
-
-            File file = new File(imageModel.getPath());  // Get the correct image path
-            if (file.exists()) {
-                Glide.with(context)
-                        .load(file)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .override(Target.SIZE_ORIGINAL)
-                        .into(imgFullPhoto);
-            }
-
+        File file = new File(imageModel.getPath());  // Get the correct image path
+        if (file.exists()) {
+            Glide.with(context)
+                    .load(file)
+                    .override(1080, 1920) // Resize the image
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(imgFullPhoto);
+        }
 
         imgFullPhoto.setOnClickListener(view1 -> {
             // Call toggleVisibility in ViewPictureActivity
