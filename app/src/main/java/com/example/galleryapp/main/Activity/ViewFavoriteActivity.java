@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
@@ -37,7 +38,8 @@ public class ViewFavoriteActivity extends AppCompatActivity {
     private void initView() {
         rvFavItems = findViewById(R.id.rv_favItems);
 
-
+        rvFavItems.setLayoutManager(new LinearLayoutManager(this));
+        loadFavorites();
     }
 
     private void loadFavorites() {

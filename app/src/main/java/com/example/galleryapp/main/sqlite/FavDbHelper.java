@@ -11,8 +11,8 @@ import androidx.annotation.Nullable;
 public class FavDbHelper extends SQLiteOpenHelper {
 
     private Context context;
-    private static final String DATABASE_NAME = "GalleryApp.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final String DATABASE_NAME = "galleryApp.db";
+    private static final int DATABASE_VERSION = 2;
     private static final String TABLE_FAVORITES = "favorites";
 
     private static final String COLUMN_ID = "id";
@@ -27,10 +27,10 @@ public class FavDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE " + DATABASE_NAME + " (" +
-                COLUMN_ID + "TEXT PRIMARY KEY, " +
-                COLUMN_PATH + " TEXT," +
-                COLUMN_TYPE + " TEXT," +
+        String query = "CREATE TABLE " + TABLE_FAVORITES + " (" +
+                COLUMN_ID + " TEXT PRIMARY KEY, " +
+                COLUMN_PATH + " TEXT, " +
+                COLUMN_TYPE + " TEXT, " +
                 COLUMN_TITLE + " TEXT)";
         db.execSQL(query);
     }
@@ -50,7 +50,7 @@ public class FavDbHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_TYPE, type);
         cv.put(COLUMN_TITLE, title); // Corrected to use COLUMN_TITLE
 
-        db.insert(TABLE_FAVORITES, null, cv);
+        db.insertWithOnConflict(TABLE_FAVORITES, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
     }
 
@@ -66,7 +66,7 @@ public class FavDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_FAVORITES,
                 new String[]{COLUMN_ID},
-                COLUMN_ID + "=?",
+                COLUMN_ID + " =?",
                 new String[]{id},
                 null, null, null);
         boolean isFavorite = cursor.getCount() > 0;

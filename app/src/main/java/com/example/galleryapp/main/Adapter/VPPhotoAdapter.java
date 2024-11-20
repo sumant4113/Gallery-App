@@ -47,13 +47,15 @@ public class VPPhotoAdapter extends PagerAdapter {
         View view = LayoutInflater.from(context).inflate(R.layout.item_image_slider, container, false);
         TouchImageView imgFullPhoto = view.findViewById(R.id.img_fullPhoto);
 
-        File file = new File(imageModel.getPath());  // Get the correct image path
-        if (file.exists()) {
-            Glide.with(context)
-                    .load(file)
-                    .override(1080, 1920) // Resize the image
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(imgFullPhoto);
+        if (imageModel != null && imageModel.getPath() != null) {
+            File file = new File(imageModel.getPath());  // Get the correct image path
+            if (file.exists()) {
+                Glide.with(context)
+                        .load(file)
+                        .override(1080, 1920) // Resize the image
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(imgFullPhoto);
+            }
         }
 
         imgFullPhoto.setOnClickListener(view1 -> {

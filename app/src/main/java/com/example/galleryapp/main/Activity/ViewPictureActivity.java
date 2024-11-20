@@ -71,6 +71,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     private GestureDetector gestureDetector;
 
     private FavDbHelper dbHelper;
+    private ArrayList<ImageModel> favModelList = new ArrayList<>();
     private ImageModel currentImage;
 
     @Override
@@ -208,6 +209,8 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         currentItemUri = getIntent().getStringExtra("ITEM_URI");
 
+        dbHelper = new FavDbHelper(this);
+
      /*   if (getIntent().getExtras() != null) {
             // Get Data from Intent
             imageModelArrayList = getIntent().getParcelableArrayListExtra("image_path");
@@ -277,15 +280,6 @@ public class ViewPictureActivity extends AppCompatActivity {
         imgFavorite.setOnClickListener(v -> addFavorite(vpFullPhoto.getCurrentItem()));
     }
 
-    private void updateFavoriteIcon() {
-        if (currentImage != null) {
-            if (dbHelper.isFavorite(currentImage.getId())) {
-                imgFavorite.setImageResource(R.drawable.img_heart_filled); // Use your red heart drawable
-            } else {
-                imgFavorite.setImageResource(R.drawable.img_heart); // Use your white heart drawable
-            }
-        }
-    }
     private ImageModel getImageAtListPosition(int position) {
         // Get the image directly from imageModelArrayList based on ViewPager position
         if (position >= 0 && position < imageModelArrayList.size()) {
@@ -293,7 +287,13 @@ public class ViewPictureActivity extends AppCompatActivity {
         }
         return null;
     }
+
     private void addFavorite(int currentItem) {
+        if (dbHelper == null) {
+            Toast.makeText(this, "Database is not initilised", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         currentImage = getImageAtListPosition(currentItem); // Get the current image based on the position
 
         if (currentImage == null) {
@@ -517,12 +517,12 @@ public class ViewPictureActivity extends AppCompatActivity {
         txtImgResolution.setText(imgResolution + "px");
         txtImgName.setText(imgName);
 
-        Log.d(TAG, "showImageProperties: +-+- id" + imgId);
+     /*   Log.d(TAG, "showImageProperties: +-+- id" + imgId);
         Log.d(TAG, "showImageProperties: +-+- path" + imgPath);
         Log.d(TAG, "showImageProperties: +-+- name" + imgName);
         Log.d(TAG, "showImageProperties: +-+- resu" + imgResolution);
         Log.d(TAG, "showImageProperties: +-+- dateTaken" + imgDateTaken);
-        Log.d(TAG, "showImageProperties: +-+- size" + imgSize);
+        Log.d(TAG, "showImageProperties: +-+- size" + imgSize);*/
     }
 
     private void setBottomSheetBehavior() {
@@ -567,4 +567,11 @@ public class ViewPictureActivity extends AppCompatActivity {
 //        finish();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
+    }
 }
