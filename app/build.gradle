@@ -57,8 +57,8 @@ dependencies {
     implementation libs.zoomage
 
     // For Responsive UI in every devices - SSP & SDP
-    implementation libs.ssp.android
-    implementation libs.sdp.android
+//    implementation libs.ssp.android
+//    implementation libs.sdp.android
 
     // Shimmer Effect
     implementation libs.shimmer

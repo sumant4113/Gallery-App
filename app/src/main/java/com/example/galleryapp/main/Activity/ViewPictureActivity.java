@@ -1,9 +1,14 @@
 package com.example.galleryapp.main.Activity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.ComponentCaller;
+import android.app.PendingIntent;
+import android.app.RecoverableSecurityException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -25,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.view.WindowCompat;
@@ -73,6 +79,7 @@ public class ViewPictureActivity extends AppCompatActivity {
     private FavDbHelper dbHelper;
     private ArrayList<ImageModel> favModelList = new ArrayList<>();
     private ImageModel currentImage;
+    private static final int DELETE_REQUEST_CODE = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -278,6 +285,8 @@ public class ViewPictureActivity extends AppCompatActivity {
         imgDelete.setOnClickListener(v -> deleteFile(vpFullPhoto.getCurrentItem(), v));
         imgEdit.setOnClickListener(v -> renameFile(vpFullPhoto.getCurrentItem(), v));
         imgFavorite.setOnClickListener(v -> addFavorite(vpFullPhoto.getCurrentItem()));
+
+        Log.d(TAG, "onCreate: Total list : "+ imageModelArrayList.size());
     }
 
     private ImageModel getImageAtListPosition(int position) {
@@ -293,9 +302,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             Toast.makeText(this, "Database is not initilised", Toast.LENGTH_SHORT).show();
             return;
         }
-
         currentImage = getImageAtListPosition(currentItem); // Get the current image based on the position
-
         if (currentImage == null) {
             Toast.makeText(this, "No image loaded yet", Toast.LENGTH_SHORT).show();
             return;
@@ -339,45 +346,114 @@ public class ViewPictureActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete this Item?")
                 .setMessage(imageModelArrayList.get(viewPosition).getTitle())
-                .setNegativeButton("Cancel", (dialog, which) -> {
-                    dialog.dismiss();
-                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("OK", (dialog, which) -> {
                     Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                            Long.parseLong(imageModelArrayList.get(viewPosition).getId()));
-                    File file = new File(imageModelArrayList.get(viewPosition).getPath());
+                            Long.parseLong(imageModelArrayList.get(viewPosition).getId())
+                    );
 
+                    try {
+                        getContentResolver().delete(contentUri, null, null);
+
+                        // If deletion succeeds
+                        imageModelArrayList.remove(viewPosition);
+                        if (imageModelArrayList.isEmpty()) {
+                            Toast.makeText(this, "No images left!", Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+
+                        Toast.makeText(this, "Image Deleted", Toast.LENGTH_SHORT).show();
+                        viewPagerPhotoAdapter.notifyDataSetChanged();
+
+                        int newPos = Math.min(viewPosition, imageModelArrayList.size() - 1);
+                        vpFullPhoto.setCurrentItem(newPos, false);
+
+                        Log.d(TAG, "deleteFile: Pass delete list count : " + imageModelArrayList.size());
+                        Snackbar.make(view, "File deleted successfully.", Snackbar.LENGTH_SHORT).show();
+                    } catch (RecoverableSecurityException e) {
+                        // Request user consent for deletion
+                        PendingIntent pendingIntent = e.getUserAction().getActionIntent();
+                        try {
+                            startIntentSenderForResult(
+                                    pendingIntent.getIntentSender(),
+                                    DELETE_REQUEST_CODE,
+                                    null, 0, 0, 0
+                            );
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            Log.d(TAG, "deleteFile: +-+- Failed to request user permission for file deletion : "+e.getMessage());
+                            Snackbar.make(view, "Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                        }
+
+                    } catch (Exception e) {
+//                        Log.d(TAG, "deleteFile: +-+-" + e.getMessage());
+                        Snackbar.make(view, "Error: Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                    }
+                   /* File file = new File(imageModelArrayList.get(viewPosition).getPath());
                     boolean deleted = file.delete();
 
-                    if (deleted && file.exists()) {
+                    if (deleted) {
                         getApplicationContext().getContentResolver().delete(contentUri, null, null);
                         imageModelArrayList.remove(viewPosition);
-
                         if (imageModelArrayList.isEmpty()) {
                             Toast.makeText(this, "No images more!", Toast.LENGTH_SHORT).show();
                             finish();
                             return;
                         }
-//                        imageModelArrayList.notify();
-
+                        Toast.makeText(this, "Image Deleted", Toast.LENGTH_SHORT).show();
                         viewPagerPhotoAdapter.notifyDataSetChanged();
 
-                        if (imageModelArrayList.size() > 0) {
-                            int newPos;
-                            if (viewPosition == imageModelArrayList.size()) { // if  last image then show previous one
-                                newPos = imageModelArrayList.size() - 1;
-                            } else {
-                                newPos = viewPosition; // Show the next image
-                            }
-                            vpFullPhoto.setCurrentItem(viewPosition, false);
+                        int newPos;
+                        if (viewPosition == imageModelArrayList.size()) { // if  last image then show previous one
+                            newPos = imageModelArrayList.size() - 1;
                         } else {
-
+                            newPos = viewPosition; // Show the next image
                         }
+                        vpFullPhoto.setCurrentItem(newPos, false);
+
                         Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                     } else {
                         Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
-                    }
+                    }*/
                 }).show();
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @NonNull ComponentCaller caller) {
+        super.onActivityResult(requestCode, resultCode, data, caller);
+        if (resultCode == DELETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == DELETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // Successfully granted permission
+                Toast.makeText(this, "File deleted after user consent", Toast.LENGTH_SHORT).show();
+                // Remove item from the list and update UI
+                int currentPosition = vpFullPhoto.getCurrentItem();
+                imageModelArrayList.remove(currentPosition);
+                if (imageModelArrayList.isEmpty()) {
+                    finish();
+                    return;
+                }
+                viewPagerPhotoAdapter.notifyDataSetChanged();
+
+                // Set new position for ViewPager
+                int newPos = Math.min(currentPosition, imageModelArrayList.size() - 1);
+                vpFullPhoto.setCurrentItem(newPos, false);
+
+                Log.d(TAG, "onActivityResult:Dontknow  delete list count : "+ imageModelArrayList.size());
+            } else {
+                Snackbar.make(vpFullPhoto, "File deletion canceled by user.", Snackbar.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void renameFile(int position, View view) {
@@ -448,6 +524,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint({"DefaultLocale", "SetTextI18n"})
     private void showImageProperties(int viewPosition) {
         String imgId = imageModelArrayList.get(viewPosition).getId();
         String imgPath = imageModelArrayList.get(viewPosition).getPath();

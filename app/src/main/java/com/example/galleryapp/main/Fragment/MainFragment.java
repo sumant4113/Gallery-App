@@ -1,15 +1,20 @@
 package com.example.galleryapp.main.Fragment;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,12 +24,15 @@ import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.GalleryRvAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainFragment extends Fragment {
 
+    private static final String TAG = "MainFragment";
     private RecyclerView rvGallery;
     private final ArrayList<ImageModel> imagesList = new ArrayList<>();
     private View view;
@@ -32,6 +40,7 @@ public class MainFragment extends Fragment {
     private Context context;
     private ExecutorService service;
     private SwipeRefreshLayout swipeRefreshMainFragment;
+    private ContentObserver contentObserver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,12 +49,54 @@ public class MainFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        refreshImageList();
+        try {
+            Log.d(TAG, "onResume: +-+-");
+            Log.d(TAG, "onResume: +-+- list : " + imagesList.size());
+            galleryRvAdapter.notifyDataSetChanged();
+        } catch (Exception e) {
+            Log.d(TAG, "onResume: +-+-" + e);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unregisterContentObserver();
+    }
+
+    private void unregisterContentObserver() {
+        if (contentObserver != null) {
+            context.getContentResolver().unregisterContentObserver(contentObserver);
+        }
+    }
+
+    private void registerContentObserver() {
+        contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange, @Nullable Uri uri) {
+                super.onChange(selfChange, uri);
+                Log.d(TAG, "onChange: MediaStore Chnaged Uri : " + uri);
+                loadImages();
+            }
+        };
+        context.getContentResolver().registerContentObserver(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,// Uri to observe
+                true,
+                contentObserver);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_main, container, false);
         initView();
         loadImages();
+        registerContentObserver();
         return view;
     }
+
 
     private void initView() {
         rvGallery = view.findViewById(R.id.rv_gallery);
@@ -68,39 +119,21 @@ public class MainFragment extends Fragment {
 
         rvGallery.setLayoutManager(layoutManager);
         rvGallery.setAdapter(galleryRvAdapter);
-
-        service.execute(new Runnable() {
-            @Override
-            public void run() {
-                loadImages();
-                swipeRefreshMainFragment.setRefreshing(false);
-            }
-        });
-        ArrayList<ImageModel> loadedImages = loadImagesFromStorage();
-        requireActivity().runOnUiThread(() -> {
-            imagesList.clear();
-            imagesList.addAll(loadedImages);
-            galleryRvAdapter.notifyDataSetChanged();
-            swipeRefreshMainFragment.setRefreshing(false);
-        });
-       /* requireActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });*/
-
     }
 
     public void loadImages() {
+        // Here loading task gone background
         new Thread(() -> {
             ArrayList<ImageModel> loadedImages = loadImagesFromStorage();
-            if (!loadedImages.isEmpty()) {
-                imagesList.clear();
-                imagesList.addAll(loadedImages);
-                requireActivity().runOnUiThread(() -> galleryRvAdapter.notifyDataSetChanged());
+
+            requireActivity().runOnUiThread(() -> {
+                if (!loadedImages.isEmpty()) {
+                    imagesList.clear();
+                    imagesList.addAll(loadedImages);
+                    galleryRvAdapter.notifyDataSetChanged();
+                }
                 swipeRefreshMainFragment.setRefreshing(false);
-            }
+            });
         }).start();
 
     }
@@ -124,7 +157,7 @@ public class MainFragment extends Fragment {
 
         Cursor cursor = getContext().getContentResolver().query(
                 uri, projection,
-                selection, selectionArgs, orderBy);
+                null, null, orderBy);
 
         if (cursor != null) {
             while (cursor.moveToNext()) {
@@ -167,7 +200,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public ArrayList<ImageModel> loadImages(Context context) {
+   /* public ArrayList<ImageModel> loadImages(Context context) {
         ArrayList<ImageModel> imageModelList = new ArrayList<>();
 
         Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -214,5 +247,23 @@ public class MainFragment extends Fragment {
             cursor.close();
         }
         return imageModelList;
+    }*/
+
+    private void refreshImageList() {
+        new Thread(() -> {
+            Iterator<ImageModel> iterator = imagesList.iterator();
+            while (iterator.hasNext()) {
+                ImageModel model = iterator.next();
+                File file = new File(model.getPath());
+                if (!file.exists()) {
+                    iterator.remove();
+                }
+            }
+            // Update adapter on main thread
+            requireActivity().runOnUiThread(() -> {
+                galleryRvAdapter.notifyDataSetChanged();
+            });
+        });
     }
+
 }

@@ -12,7 +12,6 @@
         android:layout_width="130sp"
         android:layout_height="130sp"
         android:src="@drawable/brand_google_photos"
-
         app:layout_constraintBottom_toTopOf="@+id/textView3"
         app:layout_constraintEnd_toEndOf="@+id/textView3"
         app:layout_constraintStart_toStartOf="@+id/textView3"

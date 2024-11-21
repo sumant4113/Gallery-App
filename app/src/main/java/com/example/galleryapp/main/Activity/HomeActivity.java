@@ -61,6 +61,7 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(this, "Create Album", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.menu_favoriteItem) {
                 startActivity(new Intent(this, ViewFavoriteActivity.class));
+//                drawerLayout.closeDrawer(GravityCompat.START);
             } else if (itemId == R.id.menu_rateUs) {
                 Toast.makeText(this, "Rate Us", Toast.LENGTH_SHORT).show();
             } else if (itemId == R.id.menu_shareApp) {
@@ -104,7 +105,7 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onPermissionDenied() {
                     Log.d("HomeActivity", "Permission denied.");
-                    Toast.makeText(HomeActivity.this, "Permission denied. Please enable in settings.", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(HomeActivity.this, "Permission denied. Please enable in settings.", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -149,14 +150,14 @@ public class HomeActivity extends AppCompatActivity {
                 Log.d(TAG, "Permission granted");
                 Toast.makeText(HomeActivity.this, "Permission granted. Loading images...", Toast.LENGTH_SHORT).show();
                 if (mainFragment != null) {
-                    mainFragment.loadImages(HomeActivity.this);
+                    mainFragment.loadImages();
                 }
             }
 
             @Override
             public void onPermissionDenied() {
                 Log.d(TAG, "Permission denied");
-                Toast.makeText(HomeActivity.this, "Permissions denied. You can enable them in settings.", Toast.LENGTH_LONG).show();
+//                Toast.makeText(HomeActivity.this, "Permissions denied. You can enable them in settings.", Toast.LENGTH_LONG).show();
                /* Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                         Uri.fromParts("package", getPackageName(), null));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -176,11 +177,11 @@ public class HomeActivity extends AppCompatActivity {
                 android.Manifest.permission.READ_MEDIA_IMAGES,
                 android.Manifest.permission.READ_MEDIA_VIDEO})) {
             if (mainFragment != null) {
-                mainFragment.loadImages(HomeActivity.this);  // Load images if permissions are granted
+                mainFragment.loadImages();  // Load images if permissions are granted
             }
         } else {
             if (mainFragment != null) {
-                mainFragment.loadImages(HomeActivity.this);  // Load images if permissions are granted
+                mainFragment.loadImages();  // Load images if permissions are granted
             }
 //            Objects.requireNonNull(mainFragment).loadImages(HomeActivity.this);
 

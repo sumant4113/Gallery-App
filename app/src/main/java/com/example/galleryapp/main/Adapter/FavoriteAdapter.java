@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.galleryapp.R;
-import com.squareup.picasso.Picasso;
 
 public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder> {
     private Context context;
@@ -37,7 +37,8 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
             @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex("type"));
 
             holder.title.setText(title);
-            Picasso.get().load("file://" + path).into(holder.thumbnail); // Load from path
+//            Picasso.get().load("file://" + path).into(holder.thumbnail); // Load from path
+            Glide.with(context).load("file://"+ path).into(holder.thumbnail);
             holder.typeIndicator.setText(type.equals("image") ? "Image" : "Video");
         }
     }
