@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,12 +22,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.galleryapp.R;
+import com.example.galleryapp.main.Adapter.DateWiseAdapter;
 import com.example.galleryapp.main.Adapter.GalleryRvAdapter;
 import com.example.galleryapp.main.Model.ImageModel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -41,6 +49,7 @@ public class MainFragment extends Fragment {
     private ExecutorService service;
     private SwipeRefreshLayout swipeRefreshMainFragment;
     private ContentObserver contentObserver;
+    private DateWiseAdapter dateWiseAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,40 +62,15 @@ public class MainFragment extends Fragment {
         super.onResume();
         refreshImageList();
         try {
-            Log.d(TAG, "onResume: +-+-");
-            Log.d(TAG, "onResume: +-+- list : " + imagesList.size());
+//            Log.d(TAG, "onResume: +-+-");
+//            Log.d(TAG, "onResume: +-+- list : " + imagesList.size());
             galleryRvAdapter.notifyDataSetChanged();
+//            dateWiseAdapter.notifyDataSetChanged();
         } catch (Exception e) {
-            Log.d(TAG, "onResume: +-+-" + e);
+            Log.d(TAG, "onResume: +-+- E : " + e);
         }
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        unregisterContentObserver();
-    }
-
-    private void unregisterContentObserver() {
-        if (contentObserver != null) {
-            context.getContentResolver().unregisterContentObserver(contentObserver);
-        }
-    }
-
-    private void registerContentObserver() {
-        contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-            @Override
-            public void onChange(boolean selfChange, @Nullable Uri uri) {
-                super.onChange(selfChange, uri);
-                Log.d(TAG, "onChange: MediaStore Chnaged Uri : " + uri);
-                loadImages();
-            }
-        };
-        context.getContentResolver().registerContentObserver(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,// Uri to observe
-                true,
-                contentObserver);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -109,12 +93,20 @@ public class MainFragment extends Fragment {
         galleryRvAdapter = new GalleryRvAdapter(getContext(), imagesList);
         service = Executors.newSingleThreadExecutor();
 
+//        Map<String, List<ImageModel>> groupedDate = groupImagesByDate(imagesList);
+//        dateWiseAdapter = new DateWiseAdapter(groupedDate);
+//        Log.d(TAG, "initView: +-+- groupedDate : " + groupedDate);
+//        Log.d(TAG, "initView: +-+- dateWiseAdapter : " + dateWiseAdapter);
+//        Log.d(TAG, "initView: +-+- imagesList.size() : " + imagesList.size());
+//        Log.d(TAG, "initView: +-+- dateWiseAdapter.getItemCount() : " + dateWiseAdapter.getItemCount());
+//        rvGallery.setAdapter(dateWiseAdapter);
+
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         // solve recycle view lag
         rvGallery.setHasFixedSize(true);
         rvGallery.setItemViewCacheSize(20);
         rvGallery.setDrawingCacheEnabled(true);
-        rvGallery.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        rvGallery.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
         rvGallery.setNestedScrollingEnabled(false);
 
         rvGallery.setLayoutManager(layoutManager);
@@ -131,11 +123,29 @@ public class MainFragment extends Fragment {
                     imagesList.clear();
                     imagesList.addAll(loadedImages);
                     galleryRvAdapter.notifyDataSetChanged();
+//                    dateWiseAdapter.notifyDataSetChanged();
                 }
                 swipeRefreshMainFragment.setRefreshing(false);
             });
         }).start();
 
+    }
+
+    private Map<String, List<ImageModel>> groupImagesByDate(List<ImageModel> imageList) {
+        Map<String, List<ImageModel>> groupedData = new TreeMap<>(Collections.reverseOrder()); // Dates in reverse order (newest first)
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        for (ImageModel image : imageList) {
+            String dateKey = dateFormat.format(new Date(image.getDateTaken())); // Adjust timestamp getter as per your `ImageModel`
+
+            if (!groupedData.containsKey(dateKey)) {
+                groupedData.put(dateKey, new ArrayList<>());
+            }
+            groupedData.get(dateKey).add(image);
+        }
+
+        return groupedData;
     }
 
     private ArrayList<ImageModel> loadImagesFromStorage() {
@@ -200,55 +210,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-   /* public ArrayList<ImageModel> loadImages(Context context) {
-        ArrayList<ImageModel> imageModelList = new ArrayList<>();
-
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        String orderBy = MediaStore.Images.Media.DATE_ADDED + " DESC";
-        String[] projection = {
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DATA,
-                MediaStore.Images.Media.TITLE,
-                MediaStore.Images.Media.SIZE,
-//                MediaStore.Images.Media.RESOLUTION,
-                MediaStore.Images.Media.DATE_ADDED
-        };
-
-        String selection = MediaStore.Images.Media.DATA + " like?";
-//        String[] selectionArgs = new String[]{"%" +  + "%"}; // this is selection that show only this folder type
-        String[] selectionArgs = new String[]{"%Camera%"};
-//        String[] selectionArgs = new String[]{};
-
-        Cursor cursor = getContext().getContentResolver()
-                .query(uri, projection, selection, selectionArgs , orderBy);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                String id = cursor.getString(0);
-                String path = cursor.getString(1);
-                String title = cursor.getString(2);
-                int size = cursor.getInt(3);
-//                String resolution = cursor.getString(4);
-                String dateTaken = cursor.getString(4);
-
-                String humanReadableSize;
-                if (size < 1024) {
-                    humanReadableSize = size + " Bytes";
-                } else if (size < 1024 * 1024) {
-                    humanReadableSize = size / 1024 + " KB";
-                } else {
-                    humanReadableSize = size / (1024 * 1024) + " MB";
-                }
-
-                ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, "", dateTaken);
-                imageModelList.add(imageModel);
-
-            }
-            cursor.close();
-        }
-        return imageModelList;
-    }*/
-
     private void refreshImageList() {
         new Thread(() -> {
             Iterator<ImageModel> iterator = imagesList.iterator();
@@ -262,8 +223,35 @@ public class MainFragment extends Fragment {
             // Update adapter on main thread
             requireActivity().runOnUiThread(() -> {
                 galleryRvAdapter.notifyDataSetChanged();
+//                dateWiseAdapter.notifyDataSetChanged();
             });
         });
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unregisterContentObserver();
+    }
+
+    private void unregisterContentObserver() {
+        if (contentObserver != null) {
+            context.getContentResolver().unregisterContentObserver(contentObserver);
+        }
+    }
+
+    private void registerContentObserver() {
+        contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange, @Nullable Uri uri) {
+                super.onChange(selfChange, uri);
+                Log.d(TAG, "onChange: MediaStore Chnaged Uri : " + uri);
+                loadImages();
+            }
+        };
+        context.getContentResolver().registerContentObserver(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,// Uri to observe
+                true,
+                contentObserver);
+    }
 }

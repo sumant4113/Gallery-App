@@ -86,6 +86,7 @@ public class HomeActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
     }
 
+
     private void requestPermissions() {
         if (PermissionManager.hasAllPermissions(this, new String[]{
                 Manifest.permission.READ_EXTERNAL_STORAGE,

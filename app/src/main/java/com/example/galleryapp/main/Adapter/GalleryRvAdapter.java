@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Activity.ViewPictureActivity;
+import com.example.galleryapp.main.Model.ImageDataHolder;
 import com.example.galleryapp.main.Model.ImageModel;
 
 import java.io.File;
@@ -60,8 +61,11 @@ public class GalleryRvAdapter extends RecyclerView.Adapter<GalleryRvAdapter.View
         holder.imgGalleryItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                ImageDataHolder.getInstance().setImageList(image_list);
+
                 Intent intent = new Intent(context, ViewPictureActivity.class);
-                intent.putParcelableArrayListExtra("image_path", image_list);
+//                intent.putParcelableArrayListExtra("image_path", image_list);
                 intent.putExtra("position", position);
                 context.startActivity(intent);
             }

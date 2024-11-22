@@ -57,7 +57,6 @@ public class VPPhotoAdapter extends PagerAdapter {
                         .into(imgFullPhoto);
             }
         }
-
         imgFullPhoto.setOnClickListener(view1 -> {
             // Call toggleVisibility in ViewPictureActivity
             if (context instanceof ViewPictureActivity) {
@@ -67,7 +66,6 @@ public class VPPhotoAdapter extends PagerAdapter {
                 context.startActivity(intent);*/
             }
         });
-
         container.addView(view);
         return view;
     }
