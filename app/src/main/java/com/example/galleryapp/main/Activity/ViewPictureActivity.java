@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.view.WindowCompat;
@@ -48,10 +49,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
 
 public class ViewPictureActivity extends AppCompatActivity {
 
@@ -105,6 +103,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
         initView();
 
+        updateLikeState(position);
         showImageProperties((position));
         // Set up Gesture Detector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -232,7 +231,6 @@ public class ViewPictureActivity extends AppCompatActivity {
             vpFullPhoto.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
                 }
 
                 @Override
@@ -240,6 +238,7 @@ public class ViewPictureActivity extends AppCompatActivity {
                     currentImage = getImageAtListPosition(position);
 
                     showImageProperties(p);
+                    updateLikeState(p);
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
@@ -258,7 +257,6 @@ public class ViewPictureActivity extends AppCompatActivity {
 
             });
         }
-
 
         setBottomSheetBehavior();
         imgMore.setOnClickListener(v -> {
@@ -314,6 +312,40 @@ public class ViewPictureActivity extends AppCompatActivity {
         }
     }
 
+    private void removeFavorite(int currentItem) {
+        currentImage = getImageAtListPosition(currentItem); // Get the current image based on the position
+        if (currentImage == null) {
+            Toast.makeText(this, "No Image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String id = currentImage.getId();
+
+        if (dbHelper.isFavorite(id)) {
+            dbHelper.removeFav(id);
+            updateLikeState(currentItem);
+            Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void updateLikeState(int position) {
+        if (dbHelper == null) {
+            Toast.makeText(this, "Database is not initialised", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        currentImage = getImageAtListPosition(position);
+        if (currentImage == null) {
+            imgFavorite.setImageResource(R.drawable.img_heart);
+            return;
+        }
+
+        String id = currentImage.getId();
+        if (dbHelper.isFavorite(id)) {
+            imgFavorite.setImageResource(R.drawable.img_heart_filled);
+        } else {
+            imgFavorite.setImageResource(R.drawable.img_heart);
+        }
+    }
+
     private void shareFile(int position) {
         String imagePath = ImageDataHolder.getInstance().getImageList().get(position).getPath();
         File file = new File(imagePath);
@@ -345,6 +377,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 Long.parseLong(imageModelArrayList.get(viewPosition).getId())
         );
+        removeFavorite(viewPosition); // Ensure the favorite is removed first
 
         try {
             getContentResolver().delete(contentUri, null, null);
@@ -370,6 +403,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private void handleSuccessfulDeletion(int viewPosition) {
         imageModelArrayList.remove(viewPosition);
+        removeFavorite(vpFullPhoto.getCurrentItem());
         // Check if the list is now empty
         if (imageModelArrayList.isEmpty()) {
             Toast.makeText(this, "No images left!", Toast.LENGTH_SHORT).show();
@@ -379,13 +413,12 @@ public class ViewPictureActivity extends AppCompatActivity {
         // Notify user and update UI
         Toast.makeText(this, "Image Deleted", Toast.LENGTH_SHORT).show();
         viewPagerPhotoAdapter.notifyDataSetChanged();
-
+        finish();
         int newPos = Math.min(viewPosition, imageModelArrayList.size()); // Set the next image or previous image in the ViewPager
         vpFullPhoto.setCurrentItem(newPos);
 //        vpFullPhoto.setCurrentItem(newPos, false);
         Snackbar.make(vpFullPhoto, "File deleted successfully.", Snackbar.LENGTH_SHORT).show();
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @NonNull ComponentCaller caller) {
@@ -394,6 +427,8 @@ public class ViewPictureActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 int currentPosition = vpFullPhoto.getCurrentItem();
                 handleSuccessfulDeletion(currentPosition);
+                removeFavorite(currentPosition);
+                finish();
             } else {
                 Snackbar.make(vpFullPhoto, "File deletion canceled by user.", Snackbar.LENGTH_SHORT).show();
             }
@@ -508,32 +543,19 @@ public class ViewPictureActivity extends AppCompatActivity {
         InfoUtil.InfoItem fileSizeItem = InfoUtil.retrieveFileSize(this, uri);
         String fileSize = fileSizeItem != null ? fileSizeItem.getValue() : "Unknown Size";
 
-        // Display imgSize with proper decimal precision
-        double sizeInBytes = Double.parseDouble(imgSize.replaceAll("[^0-9.]", ""));
-        String humanReadableSize = InfoUtil.formatFileSize((long) sizeInBytes);
-        // Convert the date taken from String to long
+        InfoUtil.DateItem dateItem = InfoUtil.retrieveFormattedDateAndTime(this, imgDateTaken);
+        String fileDate = dateItem.date();
+        String fileTime = dateItem.time();
+        String fileDateTime = dateItem.dateTime();
 
-        long dateTakenMillis = Long.parseLong(imgDateTaken) * 1000; // Convert seconds to milliseconds
-        Date dateTaken = new Date(dateTakenMillis);
-
-        // Create SimpleDateFormat instances for formatting
-        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("EEEE, MMMM dd, yyyy hh:mm a", Locale.getDefault());
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a", Locale.getDefault());
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
-
-        // Format the date
-        String formattedDateTime = dateTimeFormatter.format(dateTaken);
-        String formattedTime = timeFormatter.format(dateTaken);
-        String formattedDate = dateFormatter.format(dateTaken);
-
-        txtImgDateTime.setText(formattedDateTime);
-        txtImgTime.setText(formattedTime);
-        txtImgDate.setText(formattedDate);
+        txtImgDateTime.setText(fileDateTime);
+        txtImgTime.setText(fileTime);
+        txtImgDate.setText(fileDate);
         txtImgFilePath.setText(imgPath);
         txtImgResolution.setText(imgResolution + "px");
         txtImgName.setText(imgName);
         txtImgOnDeviceSize.setText("On Device (" + fileSize + ")");
-        txtImgMp.setText(humanReadableSize);
+        txtImgMp.setText("IOS ");
 
      /*   Log.d(TAG, "showImageProperties: +-+- id" + imgId);
         Log.d(TAG, "showImageProperties: +-+- path" + imgPath);

@@ -7,12 +7,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.galleryapp.R;
+import com.example.galleryapp.main.sqlite.FavDbHelper;
 
 public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.FavoriteViewHolder> {
     private Context context;
@@ -25,21 +25,21 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
 
     @Override
     public FavoriteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_favorite, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_gellery, parent, false);
         return new FavoriteViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(FavoriteViewHolder holder, int position) {
         if (cursor.moveToPosition(position)) {
-            @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex("path"));
-            @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex("title"));
-            @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex("type"));
+            @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_PATH));
+//            @SuppressLint("Range") String title = cursor.getString(cursor.getColumnIndex("title"));
+//            @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex("type"));
 
-            holder.title.setText(title);
-//            Picasso.get().load("file://" + path).into(holder.thumbnail); // Load from path
             Glide.with(context).load("file://"+ path).into(holder.thumbnail);
-            holder.typeIndicator.setText(type.equals("image") ? "Image" : "Video");
+
+//            holder.title.setText(title);
+//            holder.typeIndicator.setText(type.equals("image") ? "Image" : "Video");
         }
     }
 
@@ -50,13 +50,13 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.Favori
 
     public class FavoriteViewHolder extends RecyclerView.ViewHolder {
         ImageView thumbnail;
-        TextView title, typeIndicator;
+//        TextView title, typeIndicator;
 
         public FavoriteViewHolder(View itemView) {
             super(itemView);
-            thumbnail = itemView.findViewById(R.id.thumbnail);
-            title = itemView.findViewById(R.id.title);
-            typeIndicator = itemView.findViewById(R.id.typeIndicator);
+            thumbnail = itemView.findViewById(R.id.img_gallery_item);
+//            title = itemView.findViewById(R.id.title);
+//            typeIndicator = itemView.findViewById(R.id.typeIndicator);
         }
     }
 }

@@ -1,12 +1,11 @@
 package com.example.galleryapp.main.Activity;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -16,7 +15,7 @@ import com.example.galleryapp.main.sqlite.FavDbHelper;
 
 public class ViewFavoriteActivity extends AppCompatActivity {
 
-
+    private static final String TAG = "ViewFavoriteActivity";
     private RecyclerView rvFavItems;
     private FavoriteAdapter adapter;
     private FavDbHelper dbHelper;
@@ -25,27 +24,36 @@ public class ViewFavoriteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_favorite);
-
         initView();
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
     }
 
     private void initView() {
+        ImageView img_backBtn = findViewById(R.id.img_backBtn);
         rvFavItems = findViewById(R.id.rv_favItems);
+        dbHelper = new FavDbHelper(this);
+        rvFavItems.setLayoutManager(new GridLayoutManager(this, 3));
 
-        rvFavItems.setLayoutManager(new GridLayoutManager(this,3));
+        img_backBtn.setOnClickListener(v -> onBackPressed());
         loadFavorites();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadFavorites();
+        adapter.notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     private void loadFavorites() {
-        dbHelper = new FavDbHelper(this);
         Cursor cursor = dbHelper.getAllFavorite();
-        adapter = new FavoriteAdapter(this, cursor);
-        rvFavItems.setAdapter(adapter);
+
+        if (adapter == null) {
+            adapter = new FavoriteAdapter(this, cursor);
+            rvFavItems.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
     }
 }

@@ -12,6 +12,8 @@ import com.example.galleryapp.R;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -109,20 +111,28 @@ public class InfoUtil {
         }
     }
 
-    // Retrieve Dimensions
-   /* public static InfoItem retrieveDimensions(Context context, ExifInterface exif, AlbumItem albumItem) {
-        if (exif != null) {
-            String height = String.valueOf(exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0));
-            String width = String.valueOf(exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 0));
-            return new InfoItem(context.getString(R.string.info_dimensions), width + " x " + height);
-        }
-        // Fallback if EXIF not available
-        int[] dimensions = albumItem.getImageDimens(context);
-        return new InfoItem(context.getString(R.string.info_dimensions), dimensions[0] + " x " + dimensions[1]);
+    public record DateItem(String time, String date, String dateTime) { }
+    public static DateItem retrieveFormattedDateAndTime(Context context, String imgDateTaken) {
+        // Convert the date taken from String to long
+        long dateTakenMillis = Long.parseLong(imgDateTaken) * 1000; // Convert seconds to milliseconds
+        Date dateTaken = new Date(dateTakenMillis);
+
+        // Create SimpleDateFormat instances for formatting
+        SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("EEEE, MMMM dd, yyyy hh:mm a", Locale.getDefault());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
+
+        // Format the date
+        String formattedDateTime = dateTimeFormatter.format(dateTaken);
+        String formattedTime = timeFormatter.format(dateTaken);
+        String formattedDate = dateFormatter.format(dateTaken);
+
+
+        return new DateItem(formattedTime,formattedDate, formattedDateTime);
     }
 
     // Retrieve Date
-    public static InfoItem retrieveFormattedDate(Context context, ExifInterface exif, AlbumItem albumItem) {
+   /* public static InfoItem retrieveFormattedDate(Context context, ExifInterface exif, AlbumItem albumItem) {
         Locale locale = Locale.getDefault();
         if (exif != null) {
             String dateString = exif.getAttribute(ExifInterface.TAG_DATETIME);

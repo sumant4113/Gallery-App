@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -15,10 +16,10 @@ public class FavDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 2;
     private static final String TABLE_FAVORITES = "favorites";
 
-    private static final String COLUMN_ID = "id";
-    private static final String COLUMN_PATH = "path";
-    private static final String COLUMN_TYPE = "type";
-    private static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_ID = "id";
+    public static final String COLUMN_PATH = "path";
+    public static final String COLUMN_TYPE = "type";
+    public static final String COLUMN_TITLE = "title";
 
     public FavDbHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -55,10 +56,15 @@ public class FavDbHelper extends SQLiteOpenHelper {
     }
 
     // Remove Fav Item
-    public void removeFav(String id) {
+    public void removeFav(String item_id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_FAVORITES, COLUMN_ID + "=?", new String[]{id});
-        db.close();
+        long result = db.delete(TABLE_FAVORITES, COLUMN_ID + "=?", new String[]{item_id});
+        if (result == -1) {
+            Toast.makeText(context, "Delete DB Failed", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "Remove SQLite", Toast.LENGTH_SHORT).show();
+        }
+//        db.close();
     }
 
     // checking item FAV OR NOT FAV
