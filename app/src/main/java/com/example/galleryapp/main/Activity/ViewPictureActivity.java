@@ -39,6 +39,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPPhotoAdapter;
+import com.example.galleryapp.main.InfoUtil;
 import com.example.galleryapp.main.Model.ImageDataHolder;
 import com.example.galleryapp.main.Model.ImageModel;
 import com.example.galleryapp.main.room.FavoriteItem;
@@ -502,29 +503,16 @@ public class ViewPictureActivity extends AppCompatActivity {
         String imgDateTaken = imageModelArrayList.get(viewPosition).getDateTaken();
         String imgSize = imageModelArrayList.get(viewPosition).getSize();
 
-        String sizeWithoutUnits = imgSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
-        String humanCanRead = null;
-        try {
-            double sizeInBytes = Double.parseDouble(sizeWithoutUnits);
+        Uri uri = Uri.fromFile(new File(imgPath));
+        // Retrieve and display image details
+        InfoUtil.InfoItem fileSizeItem = InfoUtil.retrieveFileSize(this, uri);
+        String fileSize = fileSizeItem != null ? fileSizeItem.getValue() : "Unknown Size";
 
-            if (sizeInBytes < 1024) {
-                humanCanRead = String.format("%.2f B", sizeInBytes);
-            } else if (sizeInBytes < 1024 * 1024) {
-                humanCanRead = String.format("%.2f KB", sizeInBytes / (1024.0));
-            } else if (sizeInBytes < 1024 * 1024 * 1024) {
-                humanCanRead = String.format("%.2f MB", sizeInBytes / (1024.0 * 1024));
-            } else {
-                humanCanRead = String.format("%.2f GB", sizeInBytes / (1024.0 * 1024 * 1024));
-            }
-
-            txtImgOnDeviceSize.setText("On Device (" + humanCanRead + ")");
-        } catch (NumberFormatException e) {
-            // Handle the exception in case the input is invalid
-            Log.e("ViewVideoActivity", "Invalid video size format: " + imgSize, e);
-            txtImgOnDeviceSize.setText("Unknown size");
-        }
-
+        // Display imgSize with proper decimal precision
+        double sizeInBytes = Double.parseDouble(imgSize.replaceAll("[^0-9.]", ""));
+        String humanReadableSize = InfoUtil.formatFileSize((long) sizeInBytes);
         // Convert the date taken from String to long
+
         long dateTakenMillis = Long.parseLong(imgDateTaken) * 1000; // Convert seconds to milliseconds
         Date dateTaken = new Date(dateTakenMillis);
 
@@ -538,30 +526,14 @@ public class ViewPictureActivity extends AppCompatActivity {
         String formattedTime = timeFormatter.format(dateTaken);
         String formattedDate = dateFormatter.format(dateTaken);
 
-        // Set the formatted date and time to the TextViews
         txtImgDateTime.setText(formattedDateTime);
         txtImgTime.setText(formattedTime);
         txtImgDate.setText(formattedDate);
-        /*// Date and Time
-        Instant instant = Instant.ofEpochSecond(Long.parseLong(imgDateTaken));
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy hh:mm a").withZone(ZoneId.systemDefault());
-        String formattedDateTime = dateTimeFormatter.format(instant); // Get the formatted date as a string
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a").withZone(ZoneId.systemDefault());
-        String formattedTime = timeFormatter.format(instant);
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy").withZone(ZoneId.systemDefault());
-        String formattedDate = dateFormatter.format(instant);
-
-        txtImgDateTime.setText(formattedDateTime);
-        txtImgTime.setText(formattedTime);
-        txtImgDate.setText(formattedDate);*/
-
         txtImgFilePath.setText(imgPath);
-//        txtImgOnDeviceSize.setText(imgSize);
-        txtImgMp.setText(imgSize);
-//        txtImgResolution.setText(String.format("Size of ImageView: Height: %s Width: %s", String.valueOf(vpFullPhoto.getWidth()), String.valueOf(vpFullPhoto.getHeight())));
         txtImgResolution.setText(imgResolution + "px");
         txtImgName.setText(imgName);
+        txtImgOnDeviceSize.setText("On Device (" + fileSize + ")");
+        txtImgMp.setText(humanReadableSize);
 
      /*   Log.d(TAG, "showImageProperties: +-+- id" + imgId);
         Log.d(TAG, "showImageProperties: +-+- path" + imgPath);
@@ -569,6 +541,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         Log.d(TAG, "showImageProperties: +-+- resu" + imgResolution);
         Log.d(TAG, "showImageProperties: +-+- dateTaken" + imgDateTaken);
         Log.d(TAG, "showImageProperties: +-+- size" + imgSize);*/
+
     }
 
     private void setBottomSheetBehavior() {

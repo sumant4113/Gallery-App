@@ -7,4 +7,19 @@
     <string name="size_mb">%1$.2f MP</string>
     <string name="size_gb">%1$.2f GB</string>
 
+    <!-- info Dialog Strings -->
+    <string name="info_filename">Име на файла: </string>
+    <string name="info_filepath">Път към файла: </string>
+    <string name="info_size">Size: </string>
+    <string name="info_dimensions">Размери: </string>
+    <string name="info_date">Дата: </string>
+    <string name="info_location">Местоположение: </string>
+    <string name="info_focal_length">Разтояние на фокус: </string>
+    <string name="info_exposure">Експозиция: </string>
+    <string name="info_camera_model">Модел камера: </string>
+    <string name="info_aperture">Бленда: </string>
+    <string name="info_iso">ISO: </string>
+    <string name="info_frame_rate">Кадри: </string>
+    <string name="copied_to_clipboard">Копирано в клипборда</string>
+
 </resources>
