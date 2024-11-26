@@ -41,15 +41,17 @@ import java.util.concurrent.Executors;
 public class MainFragment extends Fragment {
 
     private static final String TAG = "MainFragment";
-    private RecyclerView rvGallery;
-    private final ArrayList<ImageModel> imagesList = new ArrayList<>();
     private View view;
-    private GalleryRvAdapter galleryRvAdapter;
     private Context context;
-    private ExecutorService service;
+
+    private RecyclerView rvGallery;
+    private GalleryRvAdapter galleryRvAdapter;
+    private final ArrayList<ImageModel> imagesList = new ArrayList<>();
+    private DateWiseAdapter dateWiseAdapter;
+
     private SwipeRefreshLayout swipeRefreshMainFragment;
     private ContentObserver contentObserver;
-    private DateWiseAdapter dateWiseAdapter;
+    private ExecutorService service;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,7 +101,6 @@ public class MainFragment extends Fragment {
 //        Log.d(TAG, "initView: +-+- dateWiseAdapter : " + dateWiseAdapter);
 //        Log.d(TAG, "initView: +-+- imagesList.size() : " + imagesList.size());
 //        Log.d(TAG, "initView: +-+- dateWiseAdapter.getItemCount() : " + dateWiseAdapter.getItemCount());
-//        rvGallery.setAdapter(dateWiseAdapter);
 
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         // solve recycle view lag
@@ -110,9 +111,28 @@ public class MainFragment extends Fragment {
         rvGallery.setNestedScrollingEnabled(false);
 
         rvGallery.setLayoutManager(layoutManager);
+//        rvGallery.setAdapter(dateWiseAdapter);
         rvGallery.setAdapter(galleryRvAdapter);
     }
+   /* public void loadImages() {
+        new Thread(() -> {
+            ArrayList<ImageModel> loadedImages = loadImagesFromStorage();
+            Log.d(TAG, "Loaded images count: " + loadedImages.size());
 
+            requireActivity().runOnUiThread(() -> {
+                if (!loadedImages.isEmpty()) {
+                    imagesList.clear();
+                    imagesList.addAll(loadedImages);
+
+                    // Group images by date after loading
+                    Map<String, List<ImageModel>> groupedData = groupImagesByDate(imagesList);
+                    dateWiseAdapter = new DateWiseAdapter(groupedData);
+                    rvGallery.setAdapter(dateWiseAdapter); // Set the new adapter
+                }
+                swipeRefreshMainFragment.setRefreshing(false);
+            });
+        }).start();
+    }*/
     public void loadImages() {
         // Here loading task gone background
         new Thread(() -> {
@@ -137,14 +157,19 @@ public class MainFragment extends Fragment {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
         for (ImageModel image : imageList) {
-            String dateKey = dateFormat.format(new Date(image.getDateTaken())); // Adjust timestamp getter as per your `ImageModel`
+            try {
+                long dateTakenMillis = Long.parseLong(image.getDateTaken());
+                String dateKey = dateFormat.format(new Date(dateTakenMillis));
 
-            if (!groupedData.containsKey(dateKey)) {
-                groupedData.put(dateKey, new ArrayList<>());
+                if (!groupedData.containsKey(dateKey)) {
+                    groupedData.put(dateKey, new ArrayList<>());
+                }
+                groupedData.get(dateKey).add(image);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid date format for image: " + image.getTitle(), e);
+                // Optionally, handle the error (e.g., skip this image)
             }
-            groupedData.get(dateKey).add(image);
         }
-
         return groupedData;
     }
 

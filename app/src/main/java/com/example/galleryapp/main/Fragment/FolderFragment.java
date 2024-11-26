@@ -2,9 +2,13 @@ package com.example.galleryapp.main.Fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +18,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -23,6 +26,8 @@ import com.example.galleryapp.main.Adapter.FolderRvAdapter;
 import com.example.galleryapp.main.Model.VideoModel;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FolderFragment extends Fragment {
 
@@ -33,19 +38,44 @@ public class FolderFragment extends Fragment {
     private FolderRvAdapter folderRvAdapter;
     private ArrayList<String> folderList = new ArrayList<>();
     private ArrayList<VideoModel> videoModelList = new ArrayList<>();
+
     private SwipeRefreshLayout swipeRefreshFolderFragment;
+    private ContentObserver contentObserver;
+    private ExecutorService executorService;
+    private HandlerThread observerThread;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        executorService = Executors.newSingleThreadExecutor();
+//        observerThread = new HandlerThread("ContentObserverThread");
+//        observerThread.start();
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        loadVideos();
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-         view = inflater.inflate(R.layout.fragment_folder, container, false);
+        view = inflater.inflate(R.layout.fragment_folder, container, false);
 
         initView();
+        registerContentObserver();
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (contentObserver != null) {
+            requireContext().getContentResolver().unregisterContentObserver(contentObserver);
+        }
+        executorService.shutdown();
+//        observerThread.quit();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -53,13 +83,13 @@ public class FolderFragment extends Fragment {
         rvFolder = view.findViewById(R.id.rv_folder);
         swipeRefreshFolderFragment = view.findViewById(R.id.swipeRefresh_folderFragment);
 
-        videoModelList = fetchAllVideos(requireContext());
-
         swipeRefreshFolderFragment.setOnRefreshListener(() -> {
             loadVideos();
             swipeRefreshFolderFragment.setRefreshing(false);
         });
 
+
+        videoModelList = fetchAllVideos(requireContext());
         if ((folderList != null) && !folderList.isEmpty() && (videoModelList != null)) {
             if (folderRvAdapter == null) {
                 folderRvAdapter = new FolderRvAdapter(getContext(), folderList, videoModelList);
@@ -70,9 +100,8 @@ public class FolderFragment extends Fragment {
                 rvFolder.setDrawingCacheEnabled(true);
                 rvFolder.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
                 rvFolder.setNestedScrollingEnabled(false);
-//            folderAdapter.notifyDataSetChanged();
+                rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
-                rvFolder.setLayoutManager(new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false));
                 rvFolder.setAdapter(folderRvAdapter);
             } else {
                 folderRvAdapter.updateVideoList(videoModelList);
@@ -81,10 +110,30 @@ public class FolderFragment extends Fragment {
         } else {
             Toast.makeText(getContext(), "can't find Videos", Toast.LENGTH_SHORT).show();
         }
-
     }
 
-    public void loadVideos(){
+    public void loadVideos() {
+        /*executorService.execute(() -> {
+            ArrayList<VideoModel> loadedVideos = fetchAllVideos(requireContext());
+            if (!loadedVideos.isEmpty()) {
+                videoModelList.clear();
+                videoModelList.addAll(loadedVideos);
+
+                requireActivity().runOnUiThread(() -> {
+                    if (folderRvAdapter == null) {
+                        folderRvAdapter = new FolderRvAdapter(getContext(), folderList, videoModelList);
+                        rvFolder.setAdapter(folderRvAdapter);
+                    } else {
+                        folderRvAdapter.updateVideoList(videoModelList);
+                        folderRvAdapter.notifyDataSetChanged();
+                    }
+                });
+            } else {
+                requireActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "No Video Found!", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });*/
         new Thread(() -> {
             ArrayList<VideoModel> loadedVideos = new ArrayList<>();
             if (!loadedVideos.isEmpty()) {
@@ -93,9 +142,10 @@ public class FolderFragment extends Fragment {
                 requireActivity().runOnUiThread(() -> folderRvAdapter.notifyDataSetChanged());
                 swipeRefreshFolderFragment.setRefreshing(false);
             }
-        } );
+        });
     }
 
+    @SuppressLint("Range")
     private ArrayList<VideoModel> fetchAllVideos(Context context) {
         ArrayList<String> latestFileInFolder = new ArrayList<>();
         ArrayList<VideoModel> videoModels = new ArrayList<>();
@@ -118,15 +168,15 @@ public class FolderFragment extends Fragment {
         Cursor cursor = context.getContentResolver().query(uri, projection, null, null, orderBy);
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                String id = cursor.getString(0);
-                String path = cursor.getString(1);
-                String title = cursor.getString(2);
-                String size = cursor.getString(3);
-                String width_height = cursor.getString(4);
-                String duration = cursor.getString(5);
-                String displayName = cursor.getString(6);
-                String resolution = cursor.getString(7);
-                String dateTime = cursor.getString(8);
+                String id = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media._ID));
+                String path = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+                String title = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.TITLE));
+                String size = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.SIZE));
+                String width_height = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT));
+                String duration = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DURATION));
+                String displayName = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DISPLAY_NAME));
+                String resolution = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.RESOLUTION));
+                String dateTime = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATE_ADDED));
 
                 VideoModel videoFiles = new VideoModel(id, path, title, size, resolution, duration, displayName, width_height, dateTime);
 
@@ -142,6 +192,22 @@ public class FolderFragment extends Fragment {
             cursor.close();
         }
         return videoModels;
+    }
+
+
+    private void registerContentObserver() {
+        contentObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange, @Nullable Uri uri) {
+                super.onChange(selfChange, uri);
+                loadVideos();
+            }
+        };
+        requireContext().getContentResolver().registerContentObserver(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                true,
+                contentObserver
+        );
     }
 
 }

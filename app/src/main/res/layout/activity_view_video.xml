@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout_videoViewFile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".main.Activity.ViewVideoActivity">
@@ -9,8 +10,7 @@
     <RelativeLayout
         android:id="@+id/main_layout_video"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black">
+        android:layout_height="match_parent">
 
         <!-- ViewPager for Swiping Images -->
         <androidx.viewpager.widget.ViewPager

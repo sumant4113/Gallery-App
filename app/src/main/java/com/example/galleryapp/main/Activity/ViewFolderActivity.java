@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ public class ViewFolderActivity extends AppCompatActivity {
     private ArrayList<VideoModel> videoInFolder = new ArrayList<>();
     private TextView txtFolderName;
     private String folderPath, folderName;
+    private ImageView imgBackBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,9 @@ public class ViewFolderActivity extends AppCompatActivity {
     private void initView() {
         rvFolder = findViewById(R.id.rv_folder);
         txtFolderName = findViewById(R.id.txt_folderName);
+        imgBackBtn = findViewById(R.id.img_backBtn);
+
+        imgBackBtn.setOnClickListener(v -> onBackPressed());
 
         // FolderAdapter throw data come
         if (getIntent() != null) {

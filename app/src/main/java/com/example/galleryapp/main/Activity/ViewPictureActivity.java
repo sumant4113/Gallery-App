@@ -31,7 +31,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.core.view.WindowCompat;
@@ -70,7 +69,8 @@ public class ViewPictureActivity extends AppCompatActivity {
     private FavoriteItem item;
     private String currentItemUri; // URI of current item, this for fav.item
     private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName, txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
+    private TextView txtImgDate, txtImgTime, txtImgDateTime, txtImgName,
+            txtImgMp, txtImgResolution, txtImgOnDeviceSize, txtImgFilePath;
     private int position;
     private GestureDetector gestureDetector;
 
@@ -392,7 +392,7 @@ public class ViewPictureActivity extends AppCompatActivity {
                         null, 0, 0, 0
                 );
             } catch (IntentSender.SendIntentException sendEx) {
-                Log.d(TAG, "deleteFile: +-+- Failed to request user permission for file deletion : " + e.getMessage());
+                Log.d(TAG, "deleteFile: +-+- Failed to request user permission for file deletion : " + sendEx.getMessage());
                 Snackbar.make(vpFullPhoto, "Unable to delete file.", Snackbar.LENGTH_SHORT).show();
             }
         } catch (Exception e) {

@@ -1,10 +1,16 @@
 package com.example.galleryapp.main.Activity;
 
+import android.annotation.SuppressLint;
+import android.app.ComponentCaller;
+import android.app.PendingIntent;
+import android.app.RecoverableSecurityException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
@@ -13,6 +19,7 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,14 +29,20 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.VPVideoAdapter;
+import com.example.galleryapp.main.InfoUtil;
+import com.example.galleryapp.main.Model.VideoDataHolder;
 import com.example.galleryapp.main.Model.VideoModel;
+import com.example.galleryapp.main.sqlite.FavDbHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -42,41 +55,50 @@ import java.util.Locale;
 public class ViewVideoActivity extends AppCompatActivity {
 
     private static final String TAG = "ViewVideoActivity";
+    private static final int DELETE_REQUEST_CODE = 2002;
 
     // BottomSheetProperty
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
     private LinearLayout llBottomSheet;
-
-    private RelativeLayout mainLayoutVideo;
     private LinearLayout layoutTopVideo, layoutBottomVideo;
-
-    private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
-    private TextView txtVidDate, txtVidTime;
+    private RelativeLayout mainLayoutVideo;
     private ViewPager vpFullVideo;
     private VPVideoAdapter vpVideoAdapter;
 
+
     // For FolderVideo To video
     private ArrayList<VideoModel> videoModelArrayList = new ArrayList<>();
-    private TextView txtVidDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize, txtFilePath;
+    private TextView txtVidDateTime, txtVidName, txtVidMp, txtVidResolution, txtOnDeviceSize,
+            txtFilePath, txtVidDate, txtVidTime;
+    private ImageView imgBackBtn, imgShare, imgEdit, imgFavorite, imgDelete, imgMore;
 
-    private int currentVidPosition;
+    private VideoModel currentVideo;
     private boolean isWhiteBG = true;
     private int position;
     private GestureDetector gestureDetector;
-
+    private FavDbHelper dbVidHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_video);
 
-        if (getIntent() != null) {
+        position = getIntent().getIntExtra("position", -1);
+        videoModelArrayList = VideoDataHolder.getInstance().getVideoList();
+
+        if (videoModelArrayList == null || videoModelArrayList.isEmpty() || position < 0) {
+            Toast.makeText(this, "Video Data not available.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+        /*if (getIntent() != null) {
             Intent intent = getIntent();
             videoModelArrayList = intent.getParcelableArrayListExtra("video_path");
             position = intent.getIntExtra("position", -1);
-        }
+        }*/
 
         initView();
+
+        updateVideoLikeState(position);
         showFileProperties(position);
         // Set up Gesture Detector
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -86,22 +108,39 @@ public class ViewVideoActivity extends AppCompatActivity {
                 return true;
             }
         });
+        enterFullScreen();
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
     }
 
-    public void toggleVisibility() {
-        if (!isWhiteBG) {
-            layoutTopVideo.setVisibility(View.GONE);
-            layoutBottomVideo.setVisibility(View.GONE);
-            mainLayoutVideo.setBackgroundColor(Color.BLACK);
-
-            isWhiteBG = false;
+    private void enterFullScreen() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         } else {
-            layoutTopVideo.setVisibility(View.VISIBLE);
-            layoutBottomVideo.setVisibility(View.VISIBLE);
-            mainLayoutVideo.setBackgroundColor(Color.WHITE);
+            getWindow().getInsetsController().hide(WindowInsetsCompat.Type.statusBars());
+            getWindow().getInsetsController().hide(WindowInsetsCompat.Type.navigationBars());
+        }
+    }
 
-            isWhiteBG = true;
+    public void toggleVisibility() {
+        int visibility = (layoutTopVideo.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+        layoutTopVideo.setVisibility(visibility);
+        layoutBottomVideo.setVisibility(visibility);
+        mainLayoutVideo.setBackgroundColor(visibility == View.VISIBLE ? Color.WHITE : Color.BLACK);
+
+        if (visibility == View.VISIBLE) exitFullScreen();
+        else enterFullScreen();
+    }
+
+    private void exitFullScreen() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        } else {
+            getWindow().getInsetsController().show(WindowInsetsCompat.Type.statusBars());
+            getWindow().getInsetsController().show(WindowInsetsCompat.Type.navigationBars());
         }
     }
 
@@ -132,7 +171,10 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtFilePath = findViewById(R.id.txt_vid_filePath);
         txtOnDeviceSize = findViewById(R.id.txt_vid_onDeviceSize);
 
+        dbVidHelper = new FavDbHelper(this);
+
         if (videoModelArrayList != null && !videoModelArrayList.isEmpty()) {
+
             if (vpVideoAdapter == null) {
                 vpVideoAdapter = new VPVideoAdapter(ViewVideoActivity.this, videoModelArrayList);
                 vpFullVideo.setAdapter(vpVideoAdapter);
@@ -148,9 +190,10 @@ public class ViewVideoActivity extends AppCompatActivity {
 
                 @Override
                 public void onPageSelected(int p) {
-                    currentVidPosition = p;
-                    showFileProperties(p);
+                    currentVideo = getVideoAtListPosition(p);
 
+                    updateVideoLikeState(p);
+                    showFileProperties(p);
                     if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }
@@ -191,11 +234,76 @@ public class ViewVideoActivity extends AppCompatActivity {
                 bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);  // Or use STATE_COLLAPSED
             }
         });
+
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         imgShare.setOnClickListener(v -> shareFile(vpFullVideo.getCurrentItem()));
         imgDelete.setOnClickListener(v -> deleteFile(vpFullVideo.getCurrentItem(), v));
         imgEdit.setOnClickListener(v -> renameFIle(vpFullVideo.getCurrentItem(), v));
+        imgFavorite.setOnClickListener(v -> addFavoriteVideo(vpFullVideo.getCurrentItem()));
+    }
 
+    private void addFavoriteVideo(int currentItem) {
+        if (dbVidHelper == null) {
+            Toast.makeText(this, "DataBase is not initilised.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        currentVideo = getVideoAtListPosition(currentItem);
+        if (currentVideo == null) {
+            Toast.makeText(this, "No Video loaded yet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String id = currentVideo.getId();
+        String path = currentVideo.getPath();
+        String title = currentVideo.getTitle();
+        String type = "Video";
+
+        if (dbVidHelper.isFavorite(id)) {
+            dbVidHelper.removeFav(id);
+            Toast.makeText(this, "Removed From Favorites", Toast.LENGTH_SHORT).show();
+            imgFavorite.setImageResource(R.drawable.img_heart);
+        } else {
+            dbVidHelper.addFav(id, path, type, title);
+            Toast.makeText(this, "Added to Favorites.", Toast.LENGTH_SHORT).show();
+            imgFavorite.setImageResource(R.drawable.img_heart_filled);
+        }
+    }
+
+
+    private void removeFavorite(int currentPosition) {
+        currentVideo = getVideoAtListPosition(currentPosition);
+        if (currentVideo == null) {
+            Toast.makeText(this, "No Video", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String id = currentVideo.getId();
+        if (dbVidHelper.isFavorite(id)) {
+            dbVidHelper.removeFav(id);
+            updateVideoLikeState(currentPosition);
+            Toast.makeText(this, "Removed from Favorite", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateVideoLikeState(int position) {
+        if (dbVidHelper == null) {
+            Toast.makeText(this, "No Database", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        currentVideo = getVideoAtListPosition(position);
+        if (currentVideo == null) {
+            imgFavorite.setImageResource(R.drawable.img_heart);
+            return;
+        }
+        String id = currentVideo.getId();
+        if (dbVidHelper.isFavorite(id)) {
+            imgFavorite.setImageResource(R.drawable.img_heart_filled);
+        } else {
+            imgFavorite.setImageResource(R.drawable.img_heart);
+        }
+    }
+
+    private VideoModel getVideoAtListPosition(int currentPosition) {
+        return VideoDataHolder.getInstance().getVideoAt(currentPosition);
     }
 
     private void shareFile(int position) {
@@ -210,35 +318,88 @@ public class ViewVideoActivity extends AppCompatActivity {
             startActivity(Intent.createChooser(intent, "Share video via"));
             Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
         } else {
-            // If any Error then...
-//            Toast.makeText(this, "Video file not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Video file not found", Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    private void deleteFile(int ViewPosition, View view) {
+    @SuppressLint("NewApi")
+    private void deleteFile(int viewPosition, View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Delete File")
-                .setMessage(videoModelArrayList.get(ViewPosition).getTitle())
+                .setMessage(videoModelArrayList.get(viewPosition).getTitle())
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .setPositiveButton("OK", (dialog, which) -> {
+
                     Uri contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                            Long.parseLong(videoModelArrayList.get(ViewPosition).getId()));
-                    File file = new File(videoModelArrayList.get(ViewPosition).getPath());
+                            Long.parseLong(videoModelArrayList.get(viewPosition).getId()));
+                    File file = new File(videoModelArrayList.get(viewPosition).getPath());
+
                     try {
+                        getContentResolver().delete(contentUri, null, null);
+                        handleSuccessfulDeletaion(viewPosition);
+                    } catch (RecoverableSecurityException e) {
+                        PendingIntent pendingIntent = e.getUserAction().getActionIntent();
+
+                        try {
+                            startIntentSenderForResult(
+                                    pendingIntent.getIntentSender(),
+                                    DELETE_REQUEST_CODE,
+                                    null, 0, 0, 0
+                            );
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            Log.d(TAG, "deleteFile: +-+- Failed to request user permission for file deletion : " + sendEx.getMessage());
+                            Snackbar.make(vpFullVideo, "Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                        } catch (Exception exception) {
+                            Snackbar.make(vpFullVideo, " Error : Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                   /* try {
                         boolean deleted = file.delete();
                         if (deleted) {
                             getApplicationContext().getContentResolver().delete(contentUri, null, null);
-                            videoModelArrayList.remove(ViewPosition);
+                            videoModelArrayList.remove(viewPosition);
                             vpVideoAdapter.notifyDataSetChanged();
                             Snackbar.make(view, "File deleted.", Snackbar.LENGTH_SHORT).show();
                         } else {
-                            Snackbar.make( view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
+                            Snackbar.make(view, "File delete Fail.", Snackbar.LENGTH_SHORT).show();
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
-                    }
-                }).show();
+                    }*/
+
+                })
+                .create()
+                .show();
+    }
+
+    private void handleSuccessfulDeletaion(int viewPosition) {
+        videoModelArrayList.remove(viewPosition);
+        removeFavorite(viewPosition);
+        if (videoModelArrayList.isEmpty()) {
+            Toast.makeText(this, "No Video left.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, "Video Deleted.", Toast.LENGTH_SHORT).show();
+        vpVideoAdapter.notifyDataSetChanged();
+        finish();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @NonNull ComponentCaller caller) {
+        super.onActivityResult(requestCode, resultCode, data, caller);
+        if (resultCode == DELETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                int currentPosition = vpFullVideo.getCurrentItem();
+                handleSuccessfulDeletaion(currentPosition);
+                removeFavorite(currentPosition);
+                finish();
+            } else {
+                Snackbar.make(vpFullVideo, "File deletion canceled by user.", Snackbar.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void renameFIle(int position, View view) {
@@ -325,7 +486,7 @@ public class ViewVideoActivity extends AppCompatActivity {
         String vidMp = videoModelArrayList.get(ViewPosition).getDataAdded();
         String vidSize = videoModelArrayList.get(ViewPosition).getSize();
 
-        String sizeWithoutUnits = vidSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
+       /*String sizeWithoutUnits = vidSize.replaceAll("[^0-9.]", ""); // Remove non-numeric characters except for decimal points
         String humanCanRead = null;
         try {
             long sizeInBytes = (long) Double.parseDouble(sizeWithoutUnits);
@@ -346,7 +507,7 @@ public class ViewVideoActivity extends AppCompatActivity {
             // Handle the exception in case the input is invalid
             Log.e("ViewVideoActivity", "Invalid video size format: " + vidSize, e);
             txtOnDeviceSize.setText("Unknown size");
-        }
+        }*/
 
         long dateTakenMillisecond = Long.parseLong(vidMp) * 1000;
         Date dateTakenVid = new Date(dateTakenMillisecond);
@@ -359,6 +520,11 @@ public class ViewVideoActivity extends AppCompatActivity {
         String vidFormattedTime = vidTimeFormatter.format(dateTakenVid);
         String vidFormattedDate = vidDateFormatter.format(dateTakenVid);
 
+        Uri uri = Uri.fromFile(new File(vidPath));
+        InfoUtil.InfoItem fileSizeItem = InfoUtil.retrieveFileSize(ViewVideoActivity.this, uri);
+        String fileSize = fileSizeItem != null ? fileSizeItem.getValue() : "Unknown size";
+
+        txtOnDeviceSize.setText("On Device (" + fileSize + ")");
         txtVidDate.setText(vidFormattedDate);
         txtVidTime.setText(vidFormattedTime);
         txtVidDateTime.setText(vidFormattedDateTime);
@@ -369,16 +535,16 @@ public class ViewVideoActivity extends AppCompatActivity {
         txtFilePath.setText(vidPath);
 
 //        Toast.makeText(this, "File Name : " + vidName + "Id : " + vidId + "Display Name : " + vidDisplayName + "Path : " + vidPath, Toast.LENGTH_SHORT).show();
-        Log.d(TAG, "showFileProperties: +-+-name" + vidName);            // Only Name
-        Log.d(TAG, "showFileProperties: +-+-id" + vidId);               // Id
-        Log.d(TAG, "showFileProperties: +-+-DisName" + vidDisplayName); // Name With extension MP3 Mp4
-        Log.d(TAG, "showFileProperties: +-+-path" + vidPath);       // Full path
-        Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);        // Image Size number
-        Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);  // Give Resolution (Width x Height)
-        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
-        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
-        Log.d(TAG, "showFileProperties: +-+-duration" + duration); // Duration Time
-        Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);     // not need
+//        Log.d(TAG, "showFileProperties: +-+-name" + vidName);            // Only Name
+//        Log.d(TAG, "showFileProperties: +-+-id" + vidId);               // Id
+//        Log.d(TAG, "showFileProperties: +-+-DisName" + vidDisplayName); // Name With extension MP3 Mp4
+//        Log.d(TAG, "showFileProperties: +-+-path" + vidPath);       // Full path
+//        Log.d(TAG, "showFileProperties: +-+-vidMp" + vidMp);        // Image Size number
+//        Log.d(TAG, "showFileProperties: +-+-Reso" + vidResolution);  // Give Resolution (Width x Height)
+//        Log.d(TAG, "showFileProperties: +-+-size" + vidSize);       // Size in MP
+//        Log.d(TAG, "showFileProperties: +-+-size" + humanCanRead); // Size in B
+//        Log.d(TAG, "showFileProperties: +-+-duration" + duration); // Duration Time
+//        Log.d(TAG, "showFileProperties: +-+-wh" + widthHeight);     // not need
 
     }
 
@@ -395,6 +561,7 @@ public class ViewVideoActivity extends AppCompatActivity {
                         break;
                     case BottomSheetBehavior.STATE_COLLAPSED:
                         Log.d("BottomSheet", "STATE_COLLAPSED");
+
                         break;
                     case BottomSheetBehavior.STATE_HIDDEN:
                         Log.d("BottomSheet", "STATE_HIDDEN");
