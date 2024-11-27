@@ -64,7 +64,7 @@ public class ViewPictureActivity extends AppCompatActivity {
 
     private boolean isWhiteBG = false;
 
-    private ArrayList<ImageModel> imageModelArrayList = new ArrayList<>();
+    private ArrayList<ImageModel> imageModelArrayList ;
 
     private FavoriteItem item;
     private String currentItemUri; // URI of current item, this for fav.item
@@ -75,7 +75,6 @@ public class ViewPictureActivity extends AppCompatActivity {
     private GestureDetector gestureDetector;
 
     private FavDbHelper dbHelper;
-    private ArrayList<ImageModel> favModelList = new ArrayList<>();
     private ImageModel currentImage;
 
     private static final int DELETE_REQUEST_CODE = 1001;
@@ -86,10 +85,13 @@ public class ViewPictureActivity extends AppCompatActivity {
         setContentView(R.layout.activity_view_picture);
 
         position = getIntent().getIntExtra("position", -1);
+//        imageModelArrayList = FavoriteDataHolder.getInstance().getFavoriteList();
         imageModelArrayList = ImageDataHolder.getInstance().getImageList();
+
         if (imageModelArrayList == null || imageModelArrayList.isEmpty() || position < 0) {
             Toast.makeText(this, "Image Data not available.", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
 
 //        if (getIntent().hasExtra("image_path") && getIntent().getParcelableArrayListExtra("image_path") != null) {
@@ -119,7 +121,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         vpFullPhoto.setOnClickListener(view -> toggleVisibility());
     }
 
-    private void enterFullScreen() {
+    public void enterFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -166,7 +168,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         }
     }
 
-    private void exitFullScreen() {
+    public void exitFullScreen() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -258,7 +260,7 @@ public class ViewPictureActivity extends AppCompatActivity {
             });
         }
 
-        setBottomSheetBehavior();
+//        setBottomSheetBehavior();
         imgMore.setOnClickListener(v -> {
             showImageProperties(vpFullPhoto.getCurrentItem()); // Ensure we show properties for the current image
 //            BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this, R.style.BottomSheetDialogTheme);

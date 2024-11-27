@@ -3,9 +3,7 @@ package com.example.galleryapp.main.Model;
 import java.util.ArrayList;
 
 public class ImageDataHolder {
-    // static instance for the singleTon class
     private static ImageDataHolder instance;
-
     private ArrayList<ImageModel> imageList; // Private member to hold data
 
     public ImageDataHolder() {

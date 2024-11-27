@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-public class ImageModel extends MediaModel implements Parcelable {
+public class ImageModel  implements Parcelable {
 
     String id;
     String path;

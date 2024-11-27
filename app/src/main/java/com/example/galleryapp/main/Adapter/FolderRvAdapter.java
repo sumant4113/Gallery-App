@@ -37,10 +37,8 @@ public class FolderRvAdapter extends RecyclerView.Adapter<FolderRvAdapter.MyClas
     public void updateVideoList(ArrayList<VideoModel> newVideoModel) {
 //        FolderFragment.FolderDiffCallback diffCallback = new FolderFragment.FolderDiffCallback(this.videoModel, newVideoModel);
 //        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-
         this.videoModel.clear();
         this.videoModel.addAll(newVideoModel);
-
         // Apply the updates to the adapter
 //        diffResult.dispatchUpdatesTo(this);
     }
@@ -113,23 +111,6 @@ public class FolderRvAdapter extends RecyclerView.Adapter<FolderRvAdapter.MyClas
         }
         return null;
     }
-
-//    private String getLatestFilePath(String folderPath) {
-//        String latestFile = null;
-//        long latestModified = Long.MIN_VALUE;
-//
-//        for (VideoModel model : videoModel) {
-//            String path = model.getPath();
-//            if (path.startsWith(folderPath)) {
-//                File file = new File(path);
-//                if (file.lastModified() > latestModified) {
-//                    latestModified = file.lastModified();
-//                    latestFile = path;
-//                }
-//            }
-//        }
-//        return latestFile;
-//    }
 
     private int countVideos(String folder) {
         int count = 0;
