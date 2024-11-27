@@ -89,6 +89,7 @@ public class ViewVideoActivity extends AppCompatActivity {
         if (videoModelArrayList == null || videoModelArrayList.isEmpty() || position < 0) {
             Toast.makeText(this, "Video Data not available.", Toast.LENGTH_SHORT).show();
             finish();
+            return;
         }
         /*if (getIntent() != null) {
             Intent intent = getIntent();
@@ -108,11 +109,11 @@ public class ViewVideoActivity extends AppCompatActivity {
                 return true;
             }
         });
-        enterFullScreen();
+//   enterFullScreenVideo();
         vpFullVideo.setOnClickListener(view -> toggleVisibility());
     }
 
-    private void enterFullScreen() {
+  public void enterFullScreenVideo() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -129,11 +130,11 @@ public class ViewVideoActivity extends AppCompatActivity {
         layoutBottomVideo.setVisibility(visibility);
         mainLayoutVideo.setBackgroundColor(visibility == View.VISIBLE ? Color.WHITE : Color.BLACK);
 
-        if (visibility == View.VISIBLE) exitFullScreen();
-        else enterFullScreen();
+//        if (visibility == View.VISIBLE) exitFullScreenVideo();
+//        else enterFullScreenVideo();
     }
 
-    private void exitFullScreen() {
+    public void exitFullScreenVideo() {
         WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -143,7 +144,6 @@ public class ViewVideoActivity extends AppCompatActivity {
             getWindow().getInsetsController().show(WindowInsetsCompat.Type.navigationBars());
         }
     }
-
     private void initView() {
         imgFavorite = findViewById(R.id.img_vid_favorite);
         imgBackBtn = findViewById(R.id.img_vid_backBtn);

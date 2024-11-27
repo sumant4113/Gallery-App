@@ -27,6 +27,9 @@
         android:theme="@style/Theme.GalleryApp"
         tools:targetApi="31">
         <activity
+            android:name=".main.Activity.FavViewPictureActivity"
+            android:exported="false" />
+        <activity
             android:name=".main.Activity.VideoPlayActivity"
             android:exported="false" />
         <activity

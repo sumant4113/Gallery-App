@@ -11,7 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.galleryapp.R;
 import com.example.galleryapp.main.Adapter.FavoriteAdapter;
+import com.example.galleryapp.main.Model.FavoriteModel;
 import com.example.galleryapp.main.sqlite.FavDbHelper;
+
+import java.util.ArrayList;
 
 public class ViewFavoriteActivity extends AppCompatActivity {
 
@@ -19,6 +22,7 @@ public class ViewFavoriteActivity extends AppCompatActivity {
     private RecyclerView rvFavItems;
     private FavoriteAdapter adapter;
     private FavDbHelper dbHelper;
+    private static ArrayList<FavoriteModel> favList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,15 +49,34 @@ public class ViewFavoriteActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void loadFavorites() {
         Cursor cursor = dbHelper.getAllFavorite();
+        favList.clear(); // Clear the existing list
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_PATH));
+                @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex("type"));
+                favList.add(new FavoriteModel(path, type));
+            } while (cursor.moveToNext());
+        }
 
         if (adapter == null) {
-            adapter = new FavoriteAdapter(this, cursor);
+            adapter = new FavoriteAdapter(this, favList);
             rvFavItems.setAdapter(adapter);
         } else {
             adapter.notifyDataSetChanged();
         }
     }
+   /* @SuppressLint("NotifyDataSetChanged")
+    private void loadFavorites() {
+        Cursor cursor = dbHelper.getAllFavorite();
+
+        if (adapter == null) {
+            adapter = new FavoriteAdapter(this, cursor, favList);
+            rvFavItems.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
+    }*/
 }

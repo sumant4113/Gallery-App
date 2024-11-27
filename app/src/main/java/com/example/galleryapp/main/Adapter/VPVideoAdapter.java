@@ -30,11 +30,6 @@ public class VPVideoAdapter extends PagerAdapter {
         this.videoModelArrayList = videoModelArrayList;
     }
 
-/*    public VPVideoAdapter(Context context, ArrayList<String> videoList) {
-        this.context = context;
-        this.videoListPA = videoList;
-    }*/
-
     @Override
     public int getCount() {
         return videoModelArrayList.size();
