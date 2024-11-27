@@ -72,6 +72,7 @@ public class FavViewPictureActivity extends AppCompatActivity {
 
     }
 
+
     private void initView() {
         imgFavorite = findViewById(R.id.img_favorite);
         imgBackBtn = findViewById(R.id.img_backBtn);
