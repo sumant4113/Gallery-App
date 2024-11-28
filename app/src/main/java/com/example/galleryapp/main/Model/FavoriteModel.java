@@ -1,6 +1,6 @@
 package com.example.galleryapp.main.Model;
 
-public class FavoriteModel  {
+public class FavoriteModel {
     private String path;
     private String type; // "image" or "video"
 

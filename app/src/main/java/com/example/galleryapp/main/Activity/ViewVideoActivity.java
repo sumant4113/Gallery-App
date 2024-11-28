@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -241,7 +242,50 @@ public class ViewVideoActivity extends AppCompatActivity {
         imgEdit.setOnClickListener(v -> renameFIle(vpFullVideo.getCurrentItem(), v));
         imgFavorite.setOnClickListener(v -> addFavoriteVideo(vpFullVideo.getCurrentItem()));
     }
+    public void getVideoDetails(ContentResolver contentResolver) {
+        Uri videoUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
 
+        // Define the columns you want to retrieve
+        String[] projection = {
+                MediaStore.Video.Media._ID,
+                MediaStore.Video.Media.DATA, // Path
+                MediaStore.Video.Media.DISPLAY_NAME, // Title
+                MediaStore.Video.Media.SIZE,
+                MediaStore.Video.Media.WIDTH,
+                MediaStore.Video.Media.HEIGHT,
+                MediaStore.Video.Media.DURATION,
+                MediaStore.Video.Media.DATE_ADDED
+        };
+
+        // Query MediaStore
+        try (Cursor cursor = contentResolver.query(videoUri, projection, null, null, null)) {
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    // Retrieve the values
+                    String id = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                    String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
+                    String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                    String width = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH));
+                    String height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT));
+                    String duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                    String dateAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
+
+                    // Combine width and height
+                    String resolution = width + "x" + height;
+
+                    // Print or store the details
+                    System.out.println("ID: " + id);
+                    System.out.println("Path: " + path);
+                    System.out.println("Title: " + title);
+                    System.out.println("Size: " + size);
+                    System.out.println("Resolution: " + resolution);
+                    System.out.println("Duration: " + duration);
+                    System.out.println("Date Added: " + dateAdded);
+                }
+            }
+        }
+    }
     private void addFavoriteVideo(int currentItem) {
         if (dbVidHelper == null) {
             Toast.makeText(this, "DataBase is not initilised.", Toast.LENGTH_SHORT).show();

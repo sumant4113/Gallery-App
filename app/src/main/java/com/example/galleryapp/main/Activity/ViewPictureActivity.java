@@ -10,6 +10,7 @@ import android.content.ContentUris;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
+import android.icu.text.SymbolTable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -302,6 +303,7 @@ public class ViewPictureActivity extends AppCompatActivity {
         String path = currentImage.getPath();
         String title = currentImage.getTitle();
         String type = "image"; // or "video" based on your logic
+
 
         if (dbHelper.isFavorite(id)) {
             dbHelper.removeFav(id);
