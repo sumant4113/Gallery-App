@@ -53,7 +53,7 @@ import java.util.ArrayList;
 
 public class ViewPictureActivity extends AppCompatActivity {
 
-    private static final String TAG = "BottomSheet";
+    private static final String TAG = "ViewPictureActivity";
 
     // BottomSheetProperty
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;

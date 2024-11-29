@@ -3,7 +3,6 @@ package com.example.galleryapp.main.Fragment;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -48,6 +48,7 @@ public class MainFragment extends Fragment {
     private GalleryRvAdapter galleryRvAdapter;
     private final ArrayList<ImageModel> imagesList = new ArrayList<>();
     private DateWiseAdapter dateWiseAdapter;
+    private ProgressBar progressBar;
 
     private SwipeRefreshLayout swipeRefreshMainFragment;
     private ContentObserver contentObserver;
@@ -86,6 +87,8 @@ public class MainFragment extends Fragment {
 
     private void initView() {
         rvGallery = view.findViewById(R.id.rv_gallery);
+        progressBar = view.findViewById(R.id.progress_bar);
+
         swipeRefreshMainFragment = view.findViewById(R.id.swipeRefresh_mainFragment);
 
         swipeRefreshMainFragment.setOnRefreshListener(() -> {
@@ -135,6 +138,7 @@ public class MainFragment extends Fragment {
     }*/
     public void loadImages() {
         // Here loading task gone background
+        progressBar.setVisibility(View.VISIBLE);
         new Thread(() -> {
             ArrayList<ImageModel> loadedImages = loadImagesFromStorage();
 
@@ -143,8 +147,8 @@ public class MainFragment extends Fragment {
                     imagesList.clear();
                     imagesList.addAll(loadedImages);
                     galleryRvAdapter.notifyDataSetChanged();
-//                    dateWiseAdapter.notifyDataSetChanged();
                 }
+                progressBar.setVisibility(View.INVISIBLE);
                 swipeRefreshMainFragment.setRefreshing(false);
             });
         }).start();
@@ -204,15 +208,18 @@ public class MainFragment extends Fragment {
                 String dateTaken = cursor.getString(4);
 
                 // Use BitmapFactory to retrieve image resolution
-                String resolution;
-                try {
+                String resolution = "";
+
+                File file = new File(path);
+
+                /*try {
                     BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(path, options);
                     resolution = options.outWidth + "x" + options.outHeight;
                 } catch (Exception e) {
                     resolution = "Unknown";
-                }
+                }*/
                 String humanReadableSize = convertSizeToReadable(size);
 
                 ImageModel imageModel = new ImageModel(id, path, title, humanReadableSize, resolution, dateTaken);
@@ -270,7 +277,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onChange(boolean selfChange, @Nullable Uri uri) {
                 super.onChange(selfChange, uri);
-                Log.d(TAG, "onChange: MediaStore Chnaged Uri : " + uri);
+                Log.d(TAG, "onChange: MediaStore Changed Uri : " + uri);
                 loadImages();
             }
         };

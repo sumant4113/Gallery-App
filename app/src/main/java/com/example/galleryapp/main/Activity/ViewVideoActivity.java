@@ -665,5 +665,12 @@ public class ViewVideoActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dbVidHelper != null) {
+            dbVidHelper.close(); // Explicitly close the database connection
+        }
+    }
 
 }

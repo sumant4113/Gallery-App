@@ -34,11 +34,11 @@ public class ViewP_Frag_PagerAdapter extends FragmentPagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
         if (position == 0) {
-            return "Gallery";
+            return "Photos";
 //        } else if (position == 1) {
 //            return "Video";
         } else {
-            return "Folder";
+            return "Albums";
         }
     }
 

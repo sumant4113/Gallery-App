@@ -1,6 +1,7 @@
 package com.example.galleryapp.main.Activity;
 
 import android.app.AlertDialog;
+import android.app.ComponentCaller;
 import android.app.PendingIntent;
 import android.app.RecoverableSecurityException;
 import android.content.ContentResolver;
@@ -22,6 +23,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.viewpager.widget.ViewPager;
@@ -62,7 +65,6 @@ public class FavViewPictureActivity extends AppCompatActivity {
     private VPFavItemAdapter viewFavItemAdapter;
     private static final int DELETE_REQUEST_CODE = 1301;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +80,8 @@ public class FavViewPictureActivity extends AppCompatActivity {
         }
 
         initView();
-//        getImageDetails(itemPath);
+        getImageDetails(favoriteList.get(position).getPath());
+        updateLikeState(position);
         vpFullPhoto.setOnClickListener(v -> toggleFavVisibility());
     }
 
@@ -124,15 +127,12 @@ public class FavViewPictureActivity extends AppCompatActivity {
                 viewFavItemAdapter = new VPFavItemAdapter(this, favoriteList);
                 vpFullPhoto.setAdapter(viewFavItemAdapter);
             }
-
             vpFullPhoto.setCurrentItem(position);
-
             viewFavItemAdapter.notifyDataSetChanged();
 
             vpFullPhoto.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
                 public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
                 }
 
                 @Override
@@ -141,6 +141,7 @@ public class FavViewPictureActivity extends AppCompatActivity {
                     if (itemPath != null) {
                         getImageDetails(itemPath);
                     }
+                    updateLikeState(position);
                 }
 
                 @Override
@@ -168,9 +169,16 @@ public class FavViewPictureActivity extends AppCompatActivity {
         });
         imgBackBtn.setOnClickListener(v -> onBackPressed());
         imgShare.setOnClickListener(v -> shareFile(vpFullPhoto.getCurrentItem()));
-        imgDelete.setOnClickListener(v -> showDeleteDialog(vpFullPhoto.getCurrentItem()));
+        imgDelete.setOnClickListener(v -> {
+            int currentItem = vpFullPhoto.getCurrentItem();
+            showDeleteDialog(currentItem);
+            updateLikeState(currentItem); // Refresh like button state after deletion
+        });
         imgEdit.setOnClickListener(v -> renameFile(vpFullPhoto.getCurrentItem()));
-        imgFavorite.setOnClickListener(v -> addFavorite(vpFullPhoto.getCurrentItem()));
+        imgFavorite.setOnClickListener(v -> {
+            addFavorite(vpFullPhoto.getCurrentItem());
+            updateLikeState(vpFullPhoto.getCurrentItem());
+        });
     }
 
     private void showDeleteDialog(int position) {
@@ -184,24 +192,26 @@ public class FavViewPictureActivity extends AppCompatActivity {
     }
 
     private void deletePhoto(int position) {
-        Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                Long.parseLong(favoriteList.get(position).getPath()));
+        String imageId = favoriteList.get(position).getId();
+        if (imageId != null) {
+            Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    Long.parseLong(imageId));
 
-        removeFavorite(position); // Ensure the favorite is removed first
-
-        try {
-            getContentResolver().delete(contentUri, null, null);
-            handleSuccessfulDeletion(position);
-        } catch (RecoverableSecurityException e) {
-            PendingIntent pendingIntent = e.getUserAction().getActionIntent();
             try {
-                startIntentSenderForResult(pendingIntent.getIntentSender(), DELETE_REQUEST_CODE, null, 0, 0, 0);
-            } catch (IntentSender.SendIntentException sendEx) {
-                Log.d(TAG, "deleteFile: Failed to request user permission for file deletion : " + sendEx.getMessage());
-                Snackbar.make(vpFullPhoto, "Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                getContentResolver().delete(contentUri, null, null);
+                handleSuccessfulDeletion(position);
+            } catch (RecoverableSecurityException e) {
+                PendingIntent pendingIntent = e.getUserAction().getActionIntent();
+                try {
+                    startIntentSenderForResult(pendingIntent.getIntentSender(), DELETE_REQUEST_CODE,
+                            null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    Log.d(TAG, "deleteFile: Failed to request user permission for file deletion : " + sendEx.getMessage());
+                    Snackbar.make(vpFullPhoto, "Unable to delete file.", Snackbar.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                Snackbar.make(vpFullPhoto, "Error: Unable to delete file.", Snackbar.LENGTH_SHORT).show();
             }
-        } catch (Exception e) {
-            Snackbar.make(vpFullPhoto, "Error: Unable to delete file.", Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -224,6 +234,20 @@ public class FavViewPictureActivity extends AppCompatActivity {
         vpFullPhoto.setCurrentItem(newPos);
         Snackbar.make(vpFullPhoto, "File deleted successfully.", Snackbar.LENGTH_SHORT).show();
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @NonNull ComponentCaller caller) {
+        super.onActivityResult(requestCode, resultCode, data, caller);
+        if (resultCode == DELETE_REQUEST_CODE && resultCode == RESULT_OK) {
+            int currentPosition = vpFullPhoto.getCurrentItem();
+            handleSuccessfulDeletion(currentPosition);
+//            removeFavorite(currentPosition);
+            finish();
+        } else {
+            Snackbar.make(vpFullPhoto, "File deletion canceled by user.", Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void renameFile(int position) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
@@ -265,6 +289,14 @@ public class FavViewPictureActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 intent.setData(Uri.fromFile(newFile));
                 sendBroadcast(intent);
+
+                // Update the database with the new path
+                String id = currentFavItem.getId();
+
+                dbHelper.updateFavPath(id, newPath);
+                favoriteList.get(position).setPath(newPath);
+                viewFavItemAdapter.notifyDataSetChanged();
+
                 Snackbar.make(vpFullPhoto, "Rename Successful", Snackbar.LENGTH_LONG).show();
             } else {
                 Snackbar.make(vpFullPhoto, "Rename Failed", Snackbar.LENGTH_LONG).show();
@@ -280,28 +312,30 @@ public class FavViewPictureActivity extends AppCompatActivity {
             Toast.makeText(this, "Database is not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
-
         currentFavItem = favoriteList.get(currentItem);  // Get the current favorite item
         if (currentFavItem == null) {
             Toast.makeText(this, "No image loaded yet", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String id = String.valueOf(favoriteList.get(vpFullPhoto.getId()));
-        String path = currentFavItem.getPath();
-
-        String title = "";
-        String type = "image"; // or "video" based on your logic
-
-        if (dbHelper.isFavorite(id)) {
-            dbHelper.removeFav(id);
+        String id = currentFavItem.getId();
+        if (dbHelper.isFavorite(id)) { // check is favorite
+            dbHelper.removeFav(id);     // Remove from favorite
+//            favoriteList.remove(currentItem);
+//            viewFavItemAdapter.notifyDataSetChanged();
             Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show();
-            imgFavorite.setImageResource(R.drawable.img_heart); // Change to white heart
-        } else {
+//            imgFavorite.setImageResource(R.drawable.img_heart); // Change to white heart
+            if (favoriteList.isEmpty()) {
+                Toast.makeText(this, "No more Images", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }/* else {
             dbHelper.addFav(id, path, type, title);
             Toast.makeText(this, "Added to Favorites", Toast.LENGTH_SHORT).show();
             imgFavorite.setImageResource(R.drawable.img_heart_filled); // Change to red heart
-        }
+
+        }*/
+        updateLikeState(currentItem);
     }
 
     private void removeFavorite(int currentItem) {
@@ -311,7 +345,7 @@ public class FavViewPictureActivity extends AppCompatActivity {
             return;
         }
 //        String id = currentFavItem.getId();
-        String id = String.valueOf(favoriteList.get(vpFullPhoto.getId()));
+        String id = currentFavItem.getId();
 
         if (dbHelper.isFavorite(id)) {
             dbHelper.removeFav(id);
@@ -325,18 +359,20 @@ public class FavViewPictureActivity extends AppCompatActivity {
             Toast.makeText(this, "Database is not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        currentFavItem = favoriteList.get(position);  // Get the current favorite item
-        if (currentFavItem == null) {
-            imgFavorite.setImageResource(R.drawable.img_heart);  // Set default heart if no item found
-            return;
-        }
-
-        String id = String.valueOf(favoriteList.get(vpFullPhoto.getId()));
-        if (dbHelper.isFavorite(id)) {
-            imgFavorite.setImageResource(R.drawable.img_heart_filled);  // Filled heart for favorite
-        } else {
-            imgFavorite.setImageResource(R.drawable.img_heart);  // Empty heart for not favorite
+        // Ensure that the favorite list is not empty and the position is valid
+        if (favoriteList != null && !favoriteList.isEmpty() && position < favoriteList.size()) {
+            currentFavItem = favoriteList.get(position);
+            if (currentFavItem == null) {
+                imgFavorite.setImageResource(R.drawable.img_heart); // Set default heart if no item found
+                return;
+            }
+            String id = currentFavItem.getId();
+            // Update the like state based on whether it's a favorite or not
+            if (dbHelper.isFavorite(id)) {
+                imgFavorite.setImageResource(R.drawable.img_heart_filled); // Filled heart for favorite
+            } else {
+                imgFavorite.setImageResource(R.drawable.img_heart); // Empty heart for not favorite
+            }
         }
     }
 
@@ -375,6 +411,7 @@ public class FavViewPictureActivity extends AppCompatActivity {
                 MediaStore.Images.Media.HEIGHT,
                 MediaStore.Images.Media.DATE_TAKEN, // Timestamp of capture
                 MediaStore.Images.Media.DATE_ADDED
+//                MediaStore.Images.Media.ISO
         };
 
         // Query MediaStore for a specific image
@@ -391,6 +428,7 @@ public class FavViewPictureActivity extends AppCompatActivity {
                 String height = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT));
                 String dateTaken = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN));
                 String dateAdded = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED));
+//                String iso = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ISO));
 
                 // Combine width and height
                 String resolution = width + "x" + height;
@@ -404,10 +442,20 @@ public class FavViewPictureActivity extends AppCompatActivity {
     private void showFavItemProperties(String title, String size, String resolution, String dateTaken, String dateAdded, String path) {
         // Set UI elements with the retrieved data
 
-        Uri uri = Uri.fromFile(new File(itemPath));
+        File file = new File(path);
+        if (file.exists()) {
+            Uri uri = Uri.fromFile(file);
+            // Proceed with the file operations
+            InfoUtil.InfoItem fileSizeItem = InfoUtil.retrieveFileSize(this, uri);
+            String fileSize = fileSizeItem != null ? fileSizeItem.getValue() : "Unknown Size";
+            txtImgOnDeviceSize.setText("On Device (" + fileSize + ")");
+
+        } else {
+            Log.e("FavViewPictureActivity", "File does not exist at path: " + path);
+        }
+
+/*
         // Retrieve and display image details
-        InfoUtil.InfoItem fileSizeItem = InfoUtil.retrieveFileSize(this, uri);
-        String fileSize = fileSizeItem != null ? fileSizeItem.getValue() : "Unknown Size";
 
         InfoUtil.DateItem dateItem = InfoUtil.retrieveFormattedDateAndTime(this, dateTaken);
         String fileDate = dateItem.date();
@@ -417,8 +465,22 @@ public class FavViewPictureActivity extends AppCompatActivity {
         txtImgDateTime.setText(fileDateTime);
         txtImgTime.setText(fileTime);
         txtImgDate.setText(fileDate);
+*/
+        InfoUtil.DateItem dateItem = InfoUtil.retrieveFormattedDateAndTime(this, dateAdded);
+        if (dateItem != null) {
+            String fileDate = dateItem.date();
+            String fileTime = dateItem.time();
+            String fileDateTime = dateItem.dateTime();
+
+            txtImgDateTime.setText(fileDateTime);
+            txtImgTime.setText(fileTime);
+            txtImgDate.setText(fileDate);
+        } else {
+            // Handle the case where dateItem is null
+            Log.e("FavViewPictureActivity", "DateItem is null");
+        }
+        txtImgMp.setText("IOS");
         txtImgName.setText(title);
-        txtImgOnDeviceSize.setText("On Device (" + size + ")");
         txtImgResolution.setText(resolution + " px");
         txtImgFilePath.setText(path);
 
@@ -431,6 +493,13 @@ public class FavViewPictureActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        int currentItem = vpFullPhoto.getCurrentItem();
+//        updateLikeState(currentItem); // Refresh like button state for the current item
     }
 
     @Override

@@ -10,6 +10,7 @@
     tools:ignore="ExtraText">
 
     // Main Content
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -71,8 +72,8 @@
         app:itemHorizontalPadding="25sp"
         app:itemIconPadding="25sp"
         app:itemIconSize="30dp"
-        app:itemTextAppearance="@style/NavigationViewTextStyle"
         app:itemIconTint="@color/black"
+        app:itemTextAppearance="@style/NavigationViewTextStyle"
         app:itemTextColor="@color/black"
         app:itemVerticalPadding="15dp"
         app:menu="@menu/menu_drawer" />

@@ -55,9 +55,11 @@ public class ViewFavoriteActivity extends AppCompatActivity {
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
+                @SuppressLint("Range") String id = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_ID));
                 @SuppressLint("Range") String path = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_PATH));
-                @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex("type"));
-                favList.add(new FavoriteModel(path, type));
+                @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_TYPE));
+                @SuppressLint("Range") String tittle = cursor.getString(cursor.getColumnIndex(FavDbHelper.COLUMN_TITLE));
+                favList.add(new FavoriteModel(id, path, type,tittle));
             } while (cursor.moveToNext());
         }
 
@@ -68,6 +70,14 @@ public class ViewFavoriteActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         }
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dbHelper != null) {
+            dbHelper.close(); // Explicitly close the database connection
+        }
+    }
+
    /* @SuppressLint("NotifyDataSetChanged")
     private void loadFavorites() {
         Cursor cursor = dbHelper.getAllFavorite();

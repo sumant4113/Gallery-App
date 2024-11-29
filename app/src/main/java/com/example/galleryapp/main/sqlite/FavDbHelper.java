@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -59,12 +58,12 @@ public class FavDbHelper extends SQLiteOpenHelper {
     public void removeFav(String item_id) {
         SQLiteDatabase db = this.getWritableDatabase();
         long result = db.delete(TABLE_FAVORITES, COLUMN_ID + "=?", new String[]{item_id});
-        if (result == -1) {
-            Toast.makeText(context, "Delete DB Failed", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(context, "Remove SQLite", Toast.LENGTH_SHORT).show();
-        }
-//        db.close();
+//        if (result == -1) {
+//            Toast.makeText(context, "Delete DB Failed", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(context, "Remove SQLite", Toast.LENGTH_SHORT).show();
+//        }
+        db.close();
     }
 
     // checking item FAV OR NOT FAV
@@ -84,6 +83,15 @@ public class FavDbHelper extends SQLiteOpenHelper {
     public Cursor getAllFavorite() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query(TABLE_FAVORITES, null, null, null, null, null, null);
+    }
+
+    public void updateFavPath(String id, String newPath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_PATH, newPath);
+
+        db.update(TABLE_FAVORITES, cv, COLUMN_ID, new String[]{id});
+        db.close();
     }
 
 }
